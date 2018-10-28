@@ -1,6 +1,22 @@
 
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Login page {% endblock %}
+{% load static %}
 
-<h1>LOGIN </h1>
+{% block content %}
+
+<div class="body_signup"></div>
+	<div class="grad"></div>
+	<div class="header">
+
+		<div>Accounts<span>Signup</span></div>
+	</div>
+    <br>
+</div>
+<div class="login">
+    <h1> Let's login </h1>
+    
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
@@ -8,3 +24,6 @@
 </form>
 
 <a href="{% url 'bc_signature:signup' %}"> signup !!!</a>
+</div>
+
+{% endblock %}
