@@ -3,19 +3,21 @@
 
 {% block content %}
   <h2>Sign up</h2>
-  <form method="post">
-    {% csrf_token %}
-    {% if messages %}
-    <ul class="messages">
-    {% for message in messages %}
-    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
-						{{ message }}
-	  </li>
-    {% endfor %}
-    </ul>
-    {% endif %}
-    {{ form.as_p }}
-    <button type="submit">Sign up</button>
-  </form>
+  
+<form method="post" action="{% url 'bc_signature:signup' %}">
+  {% csrf_token %}
+  <!-- catch error POST form -->
+  {% for hidden in form.hidden_fields %}
+	{{ hidden }}
+	{% endfor %}
+	{% for field in form %}
+	    <div class="fieldWrapper">
+	        {{ field.errors }}
+	        {{ field.label_tag }} {{ field }}
+	    </div>
+	{% endfor %}
+   
+  <button type="submit">Sign up</button>
+</form>
   <a href="{% url 'bc_signature:login' %}"> login !!!</a>
 {% endblock %}
