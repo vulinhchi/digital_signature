@@ -1,0 +1,11 @@
+<h3>
+    hello 
+    {% if request.user and user.is_authenticated %}
+            <li ><h3 style="color: pink">hello user: {{ request.user.username }} </h3></li>
+            <li>
+              <a href = "{% url 'bc_signature:logout' %}">log out!!!</a></li>
+            {% else %}
+            <li><a href="{% url 'bc_signature:login' %}"> login !!!</a></li>
+            <li><a href="{% url 'bc_signature:signup' %}"> signup !!!</a></li>
+            {% endif %}
+</h3>
