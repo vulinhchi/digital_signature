@@ -51,6 +51,12 @@ def RegisterWallet(request):
             wallet.save()
         else:
             data = 'user already had an wallet account'
+            info = ""
+            for item in list_user_id_in_wallets:
+                if u.id == item:
+                    i = models.WalletAccount.objects.get(user=u)
+                    info = f"account : {i.wallet_account} and private_key: {i.wallet_private_key}"
+            data += info
     else:
         data = "User need to log in!"           
     return render(request, 'get_account.html', {'data':data})
