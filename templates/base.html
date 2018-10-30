@@ -39,7 +39,9 @@
         {% if user.is_authenticated %}
           <li>Hello {{ user.username }}</li>
           <li><a href="{% url 'bc_signature:logout' %}">Logout </a></li>
-        {% else %}
+          
+          <li><a href="{% url 'bc_signature:get_wallet' %}">get wallet account </a></li>
+          {% else %}
        
         <li>  <a href="{% url 'bc_signature:login' %}">login</a> </li>
         <li>  <a href="{% url 'bc_signature:signup' %}">signup</a> </li>
@@ -60,12 +62,14 @@
           {% if user.is_authenticated %}
             <h2>Hi {{ user.username }}</h2>
 
+              
+              {% block wallet %}
+              {% endblock %}
           {% endif %}
 
 
           {% block content %}
           {% endblock %}
-
 
       </div>
     </div>
@@ -82,7 +86,7 @@
       <div class="col-xs-12 col-md-6"> <img src="{% static '/img/about.jpg' %}" class="img-responsive" alt=""> </div>
       <div class="col-xs-12 col-md-6">
         <div class="about-text">
-          <h2> Xác thực đa nhân tố với Google Authenticator </h2>
+          <h2> ứng dụng chữ kí số dựa trên blockchain </h2>
 
 
       </div>

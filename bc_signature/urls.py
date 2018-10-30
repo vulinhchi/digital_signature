@@ -9,5 +9,8 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='base.html'), name='home'),
     path('login/', bc_signature_views.Login.as_view(), name='login'),
     path('signup/', bc_signature_views.Signup, name='signup'),
-    path('logout/', logout, {'next_page': settings.LOGOUT_REDIRECT_URL}, name='logout')
+    path('logout/', logout, {'next_page': settings.LOGOUT_REDIRECT_URL}, name='logout'),
+    # main url
+    path('register_wallet/', bc_signature_views.RegisterWallet, name='get_wallet'),
+
 ]

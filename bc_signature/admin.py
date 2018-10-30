@@ -1,3 +1,6 @@
 from django.contrib import admin
+from bc_signature.models import WalletAccount, RSAAccount
 
-# Register your models here.
+admin.site.register(WalletAccount)
+admin.site.register(RSAAccount)
+
