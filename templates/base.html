@@ -41,6 +41,8 @@
           <li><a href="{% url 'bc_signature:logout' %}">Logout </a></li>
           
           <li><a href="{% url 'bc_signature:get_wallet' %}">get wallet account </a></li>
+          <li><a href="{% url 'bc_signature:get_rsa_account' %}">get RSA key pair </a></li>
+          
           {% else %}
        
         <li>  <a href="{% url 'bc_signature:login' %}">login</a> </li>

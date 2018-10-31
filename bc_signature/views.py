@@ -6,6 +6,7 @@ from django.contrib.auth import views as base_auth_view
 import requests
 from bc_signature import models
 import json
+from Crypto.PublicKey import RSA
 # class Signup(generic.CreateView):
 #     form_class = UserCreationForm
 #     success_url = reverse_lazy('bc_signature:login')
@@ -62,3 +63,36 @@ def RegisterWallet(request):
     return render(request, 'get_account.html', {'data':data})
 
 
+def ResgisterRSA(request):
+    data = ''
+    list_user_id_has_rsa_key = []
+    if request.user.is_authenticated:
+        id_user = request.user.id
+        rsa_keys = models.RSAAccount.objects.all()
+        u = models.User.objects.get(id=id_user)
+
+        for key in rsa_keys:
+            list_user_id_has_rsa_key.append(key.user.id)
+        if u.id not in list_user_id_has_rsa_key: # check if user had not created wallet account yet
+            rsa_key = models.RSAAccount()
+            prikey = RSA.generate(1024)
+            pubkey = prikey.publickey()
+            # save json in models:
+            rsa_key.user = u
+            rsa_key.rsa_private_key = prikey
+            rsa_key.rsa_public_key  = pubkey
+            rsa_key.save()
+            data = f'publickey = {pubkey} and private key = {prikey}'
+        else:
+            data = 'user already had an rsa keypair'
+            info = ""
+            for item in list_user_id_has_rsa_key:
+                if u.id == item:
+                    i = models.RSAAccount.objects.get(user=u)
+                    info = f"publickey : {i.rsa_public_key} and private_key: {i.rsa_private_key}"
+            data += info
+    else:
+        data = "User need to log in!"           
+    return render(request, 'get_account.html', {'data':data})
+
+    

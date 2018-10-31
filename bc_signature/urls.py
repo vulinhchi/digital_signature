@@ -12,5 +12,5 @@ urlpatterns = [
     path('logout/', logout, {'next_page': settings.LOGOUT_REDIRECT_URL}, name='logout'),
     # main url
     path('register_wallet/', bc_signature_views.RegisterWallet, name='get_wallet'),
-
+    path('register_rsa/', bc_signature_views.ResgisterRSA, name='get_rsa_account')
 ]
