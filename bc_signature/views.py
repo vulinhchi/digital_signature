@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from django.template import loader
+from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.views import generic
 from django.urls import reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
@@ -7,6 +9,7 @@ import requests
 from bc_signature import models
 import json
 from Crypto.PublicKey import RSA
+
 # class Signup(generic.CreateView):
 #     form_class = UserCreationForm
 #     success_url = reverse_lazy('bc_signature:login')
@@ -70,29 +73,50 @@ def ResgisterRSA(request):
         id_user = request.user.id
         rsa_keys = models.RSAAccount.objects.all()
         u = models.User.objects.get(id=id_user)
-
+        mess = "ahihi"
+        
+        print(" kieu: ", RSA.generate(1024).exportKey())
+        a = RSA.generate(1024)
+        print(" a = ",type(a)) # <class 'Crypto.PublicKey.RSA._RSAobj'>
         for key in rsa_keys:
             list_user_id_has_rsa_key.append(key.user.id)
         if u.id not in list_user_id_has_rsa_key: # check if user had not created wallet account yet
             rsa_key = models.RSAAccount()
             prikey = RSA.generate(1024)
+            print('type pri', prikey) # <_RSAobj @0x7fdee9260d68 n(1024),e,d,p,q,u,private>
             pubkey = prikey.publickey()
+            print(type(prikey)) #<class 'Crypto.PublicKey.RSA._RSAobj'>
             # save json in models:
             rsa_key.user = u
-            rsa_key.rsa_private_key = prikey
-            rsa_key.rsa_public_key  = pubkey
+            rsa_key.rsa_private_key = prikey.exportKey()
+            rsa_key.rsa_public_key  = pubkey.exportKey()
+            print('sau khi luu vao DB',type(rsa_key.rsa_private_key)) # <class 'bytes'>
             rsa_key.save()
+            print('sau khi luu vao DB 2 ',type(rsa_key.rsa_private_key)) # <class 'bytes'>
             data = f'publickey = {pubkey} and private key = {prikey}'
         else:
-            data = 'user already had an rsa keypair'
+            data = 'user already had an rsa keypair  '
             info = ""
             for item in list_user_id_has_rsa_key:
                 if u.id == item:
                     i = models.RSAAccount.objects.get(user=u)
-                    info = f"publickey : {i.rsa_public_key} and private_key: {i.rsa_private_key}"
+                    print(type(i.rsa_private_key)) #<class 'str'>
+                    pub = i.rsa_public_key
+                    pri = i.rsa_private_key
+                    info = f"publickey : {pub} and private_key: {pri}"
             data += info
     else:
         data = "User need to log in!"           
     return render(request, 'get_account.html', {'data':data})
 
     
+def sign_contract(request):
+    template_sign = loader.get_template('base.html')
+    try:
+        content = request.POST['content']
+        print(content)
+        return HttpResponse(template_sign.render({
+			'message': content
+		}, request))
+    except:
+        return HttpResponse(template_sign.render({}, request))

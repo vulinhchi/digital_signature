@@ -63,14 +63,21 @@
         <div class="intro-text">
           {% if user.is_authenticated %}
             <h2>Hi {{ user.username }}</h2>
-
-              
+              <form action="{% url 'bc_signature:sign' %}" method="POST"> 
+                  {% csrf_token %}
+                <label style="size:unset">type your text for signing: </label>
+                <textarea name="content" rows="20" cols="90" required></textarea>
+                <br>
+                <input type="submit" value="Sign with your private key"> 
+              </form>
               {% block wallet %}
+              AHIHI
               {% endblock %}
           {% endif %}
-
+          
 
           {% block content %}
+          
           {% endblock %}
 
       </div>
