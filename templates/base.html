@@ -65,6 +65,13 @@
             <h2>Hi {{ user.username }}</h2>
               <form action="{% url 'bc_signature:sign' %}" method="POST"> 
                   {% csrf_token %}
+                  {% if messages %}
+                  <ul class="messages">
+                  {% for message in messages %}
+                  <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                  {% endfor %}
+                  </ul>
+                  {% endif %}
                 <label style="size:unset">type your text for signing: </label>
                 <textarea name="content" rows="20" cols="90" required></textarea>
                 <br>
