@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block transaction %}
+
+<h2>All transactions of user : @{{ user.username }} </h2>
+{% for i in list_info_transaction %}
+
+ <li> 
+        <a href="{% url 'bc_signature:detail_transaction' i.transaction_hash %}"> {{ i.transaction_hash }}
+        </a>
+
+</li>
+{% endfor %}
+{% endblock %}

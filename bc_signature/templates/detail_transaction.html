@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block detail_transaction %}
+<h4>from: </h4>
+{{ info.from}}
+<br/>
+<h4>to : </h4>
+{{ info.to}}
+<br/>
+<h4>time: </h4>
+{{ info.time}}
+<br/>
+<h4>public key: </h4>
+{{ info.data.public_key}}
+<br/>
+<h4>signature: </h4>
+{{ info.data.signature}}
+<br/>
+<h4>contract: </h4>
+{{ info.data.text}}
+<br/>
+
+{% endblock %}

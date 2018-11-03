@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.template import loader
 from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.views import generic
 from django.contrib import messages
 from django.views import generic
 from django.urls import reverse_lazy
@@ -10,14 +11,15 @@ import requests
 from bc_signature import models
 import json
 from Crypto.PublicKey import RSA
+from queue import Queue
 
 # class Signup(generic.CreateView):
 #     form_class = UserCreationForm
 #     success_url = reverse_lazy('bc_signature:login')
 #     template_name = 'signup.html'
-    
+que = Queue()
 headers = {'content-type': 'application/json'}
-
+list_info_transaction = []
 def Signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -148,19 +150,40 @@ def sign_contract(request):
                         pri_import = RSA.importKey(pri)
                         
                         signature = pri_import.sign(content.encode(),10)
-                        
+                        print(signature)
+                        print(type(signature))
+                        print(type(json.dumps(signature)))
+                        signature_json = json.dumps(signature).encode()
+                        print("signature_json = ", signature_json)
+                        print(signature_json)
+                        print(type(signature_json))
                         # verify:
-                        result = pub_import.verify(content.encode(),signature)
+                        print("verify: ")
+                        # chuyen signature tu bytes >> string
+                        signature_json_ = signature_json.decode()
+                        print("signature_json_", signature_json_)
+                        # print(type(signature_json))
+
+                        # chuyen signature tu string thanh list
+                        sign = json.loads(signature_json)
+                        print("sign = ", sign)
+                        # print(type(sign))
+
+                        # chuyen signature tu list thanh tuple >> verify okie
+                        sign1 = tuple(sign)
+                        result = pub_import.verify(content.encode(),sign)
                         print("ket qua: ", result)
                         # save on blokchhain: 
                         if result:
+                            wallet = models.WalletAccount.objects.get(user=u)
+                            print(wallet.wallet_account)
                             transaction = {
-                                'from': "43430909990",
+                                'from': wallet.wallet_account,
                                 'to':'34jer84838',
                                 'data':
                                 {
                                     'text': content,
-                                    'signature': signature,
+                                    'signature': signature_json_,
                                     'public_key': pub,
                                     'user_id': id_user,
                                     'username': u.username
@@ -175,6 +198,58 @@ def sign_contract(request):
                 messages.error(request, "You should need a wallet account ")
         else:
             messages.error(request, 'You have to login!')
-        return render(request, 'base.html')
+        return render(request, 'sign_rsa.html')
     except:
-        return render(request, 'base.html')
+        return render(request, 'sign_rsa.html')
+
+
+
+def list_transaction_by_account(request):
+    wallet = models.WalletAccount.objects.get(user=request.user)
+    account = wallet.wallet_account
+    rep = requests.get(f'http://172.30.0.1:2201/transactions/{account}')
+    data = rep.text
+    print(type(data))
+    data = json.loads(data)
+    print("dât = ", data['result'])
+
+    print(type(data['result']))
+    list_info_transaction = data['result']
+    print(type(list_info_transaction))
+    que = list_info_transaction
+    for i in list_info_transaction:
+        print(" thong tin = ", i['transaction_hash'])
+
+    print("type of?? = ", type(list_info_transaction[0]['transaction_hash']))
+    return render(request, 'get_transactions.html', {
+        'user': request.user,
+        'list_info_transaction':list_info_transaction})
+
+
+
+def detail_transaction(request, transaction_hash):
+    # transaction_hash = request.GET['transaction_hash']
+    info = ''
+    wallet = models.WalletAccount.objects.get(user=request.user)
+    account = wallet.wallet_account
+    rep = requests.get(f'http://172.30.0.1:2201/transactions/{account}')
+    data = rep.text
+    print(type(data))
+    data = json.loads(data)
+    print("dât = ", data['result'])
+
+    print(type(data['result']))
+    list_info_transaction = data['result']
+    
+    print("list_info_transaction = ", list_info_transaction)
+    for i in list_info_transaction:
+        print("inf  = ", i)
+        print("type of i = ", type(i))
+        print(i['transaction_hash'])
+        print(transaction_hash)
+        if i['transaction_hash'] == transaction_hash:
+            info = i
+            print("info = ", info)
+            
+    # return(request, 'detail_transaction.html') để lại nhắc nhở, code ngu, tốn mấy tiếng =.=
+    return render(request, 'detail_transaction.html', {'info':info})

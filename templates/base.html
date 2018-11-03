@@ -42,6 +42,8 @@
           
           <li><a href="{% url 'bc_signature:get_wallet' %}">get wallet account </a></li>
           <li><a href="{% url 'bc_signature:get_rsa_account' %}">get RSA key pair </a></li>
+          <li><a href="{% url 'bc_signature:sign' %}">Sign contract</a></li>
+          <li><a href="{% url 'bc_signature:my_transactions' %}">My transactions</a></li>
           
           {% else %}
        
@@ -63,22 +65,19 @@
         <div class="intro-text">
           {% if user.is_authenticated %}
             <h2>Hi {{ user.username }}</h2>
-              <form action="{% url 'bc_signature:sign' %}" method="POST"> 
-                  {% csrf_token %}
-                  {% if messages %}
-                  <ul class="messages">
-                  {% for message in messages %}
-                  <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                  {% endfor %}
-                  </ul>
-                  {% endif %}
-                <label style="size:unset">type your text for signing: </label>
-                <textarea name="content" rows="20" cols="90" required></textarea>
-                <br>
-                <input type="submit" value="Sign with your private key"> 
-              </form>
+
+              {% block sign %}
+             
+              {% endblock %}
+
               {% block wallet %}
-              AHIHI
+              
+              {% endblock %}
+              {% block transaction %}
+              
+              {% endblock %}
+
+              {% block detail_transaction %}
               {% endblock %}
           {% endif %}
           
