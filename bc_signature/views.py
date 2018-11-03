@@ -11,15 +11,14 @@ import requests
 from bc_signature import models
 import json
 from Crypto.PublicKey import RSA
-from queue import Queue
 
 # class Signup(generic.CreateView):
 #     form_class = UserCreationForm
 #     success_url = reverse_lazy('bc_signature:login')
 #     template_name = 'signup.html'
-que = Queue()
+
 headers = {'content-type': 'application/json'}
-list_info_transaction = []
+
 def Signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -125,7 +124,6 @@ def check_wallet_account_exist(user_id):
 
 
 def sign_contract(request):
-    template_sign = loader.get_template('base.html')
     try:
         content = request.POST['content']
         print(content)
@@ -138,15 +136,13 @@ def sign_contract(request):
             result_rsa, list_user_id_has_rsa_key = check_RSA_account_exist(id_user)
             result_wallet , list_user_id_in_wallets = check_wallet_account_exist(id_user)
             if result_rsa and result_wallet:
-                # sign
+                # sign use private key
                 for item in list_user_id_has_rsa_key:
                     if id_user == item:
                         i = models.RSAAccount.objects.get(user=u)
                         
-                        pub = i.rsa_public_key
                         pri = i.rsa_private_key
                         
-                        pub_import = RSA.importKey(pub)
                         pri_import = RSA.importKey(pri)
                         
                         signature = pri_import.sign(content.encode(),10)
@@ -157,22 +153,7 @@ def sign_contract(request):
                         print("signature_json = ", signature_json)
                         print(signature_json)
                         print(type(signature_json))
-                        # verify:
-                        print("verify: ")
-                        # chuyen signature tu bytes >> string
-                        signature_json_ = signature_json.decode()
-                        print("signature_json_", signature_json_)
-                        # print(type(signature_json))
-
-                        # chuyen signature tu string thanh list
-                        sign = json.loads(signature_json)
-                        print("sign = ", sign)
-                        # print(type(sign))
-
-                        # chuyen signature tu list thanh tuple >> verify okie
-                        sign1 = tuple(sign)
-                        result = pub_import.verify(content.encode(),sign)
-                        print("ket qua: ", result)
+                        
                         # save on blokchhain: 
                         if result:
                             wallet = models.WalletAccount.objects.get(user=u)
@@ -205,6 +186,7 @@ def sign_contract(request):
 
 
 def list_transaction_by_account(request):
+    mess = ''
     wallet = models.WalletAccount.objects.get(user=request.user)
     account = wallet.wallet_account
     rep = requests.get(f'http://172.30.0.1:2201/transactions/{account}')
@@ -216,40 +198,68 @@ def list_transaction_by_account(request):
     print(type(data['result']))
     list_info_transaction = data['result']
     print(type(list_info_transaction))
-    que = list_info_transaction
+    username = request.user.username
+    if len(list_info_transaction) == 0:
+        mess = f'User @{username} does not have any transaction yet'
     for i in list_info_transaction:
         print(" thong tin = ", i['transaction_hash'])
 
-    print("type of?? = ", type(list_info_transaction[0]['transaction_hash']))
     return render(request, 'get_transactions.html', {
         'user': request.user,
+        'mess': mess,
         'list_info_transaction':list_info_transaction})
 
 
 
 def detail_transaction(request, transaction_hash):
-    # transaction_hash = request.GET['transaction_hash']
     info = ''
-    wallet = models.WalletAccount.objects.get(user=request.user)
-    account = wallet.wallet_account
-    rep = requests.get(f'http://172.30.0.1:2201/transactions/{account}')
+    # wallet = models.WalletAccount.objects.get(user=request.user)
+    # account = wallet.wallet_account
+    rep = requests.get(f'http://172.30.0.1:2201/transaction/{transaction_hash}')
     data = rep.text
-    print(type(data))
+    # print(type(data))
     data = json.loads(data)
-    print("dât = ", data['result'])
+    info_1_transaction = data['result']
+    # print("dât = ", data['result'])
 
-    print(type(data['result']))
-    list_info_transaction = data['result']
+    # print(type(data['result']))
+    # list_info_transaction = data['result']
     
-    print("list_info_transaction = ", list_info_transaction)
-    for i in list_info_transaction:
-        print("inf  = ", i)
-        print("type of i = ", type(i))
-        print(i['transaction_hash'])
-        print(transaction_hash)
-        if i['transaction_hash'] == transaction_hash:
-            info = i
-            print("info = ", info)
+    print("list_info_transaction = ", info_1_transaction)
             
     # return(request, 'detail_transaction.html') để lại nhắc nhở, code ngu, tốn mấy tiếng =.=
-    return render(request, 'detail_transaction.html', {'info':info})
+    return render(request, 'detail_transaction.html', {'info':info_1_transaction})
+
+
+def check_signature(request, transaction_hash):
+    mess = ''
+    rep = requests.get(f'http://172.30.0.1:2201/transaction/{transaction_hash}')
+    data = rep.text
+   
+    data = json.loads(data)
+    info_1_transaction = data['result']
+    print("list_info_transaction = ", info_1_transaction)
+    content = info_1_transaction['data']['text']
+    # pub = 
+    pub_import = RSA.importKey(info_1_transaction['data']['public_key'].encode())
+    # verify:
+    print("verify: ")
+    # chuyen signature tu bytes >> string
+    signature_json_ = info_1_transaction['data']['signature']
+    print("signature_json_", signature_json_)
+    # print(type(signature_json))
+
+    # chuyen signature tu string thanh list
+    sign = json.loads(signature_json_)
+    print("sign = ", sign)
+    # print(type(sign))
+
+    # chuyen signature tu list thanh tuple >> verify okie
+    sign1 = tuple(sign)
+    result = pub_import.verify(content.encode(),sign)
+    print("ket qua: ", result)
+    return render(request, 'detail_transaction.html', {
+        'verify':result,
+        'info':info_1_transaction
+        })
+

@@ -20,4 +20,6 @@
 {{ info.data.text}}
 <br/>
 
+<a href="{% url 'bc_signature:check_signature' info.transaction_hash %}">check signature</a>
+{{verify}}
 {% endblock %}

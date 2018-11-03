@@ -15,5 +15,6 @@ urlpatterns = [
     path('register_rsa/', bc_signature_views.ResgisterRSA, name='get_rsa_account'),
     path('sign/', bc_signature_views.sign_contract, name='sign'),
     path('my_transactions/', bc_signature_views.list_transaction_by_account, name = 'my_transactions'),
-    path('detail_transaction/<str:transaction_hash>', bc_signature_views.detail_transaction, name = 'detail_transaction')
+    path('detail_transaction/<str:transaction_hash>', bc_signature_views.detail_transaction, name = 'detail_transaction'),
+    path('check_signature/<str:transaction_hash>', bc_signature_views.check_signature, name = 'check_signature')
 ]

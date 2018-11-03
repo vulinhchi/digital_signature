@@ -3,6 +3,7 @@
 {% block transaction %}
 
 <h2>All transactions of user : @{{ user.username }} </h2>
+<h3 style="color:indianred">{{ mess }}</h3>
 {% for i in list_info_transaction %}
 
  <li> 
