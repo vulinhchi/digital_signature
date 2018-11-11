@@ -45,6 +45,7 @@
           <li><a href="{% url 'bc_signature:sign' %}">Sign contract</a></li>
           <li><a href="{% url 'bc_signature:my_transactions' %}">My transactions</a></li>
           
+          <li><a href="{% url 'bc_signature:sign_transaction' %}">Sign transactions</a></li>
           {% else %}
        
         <li>  <a href="{% url 'bc_signature:login' %}">login</a> </li>
@@ -65,7 +66,7 @@
         <div class="intro-text">
           {% if user.is_authenticated %}
             <h2>Hi {{ user.username }}</h2>
-
+               thong tin : {{ signed }}
               {% block sign %}
              
               {% endblock %}

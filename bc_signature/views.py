@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.template import loader
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.views import generic
@@ -11,6 +11,9 @@ import requests
 from bc_signature import models
 import json
 from Crypto.PublicKey import RSA
+# from Crypto.Signature import pkcs1_15
+# from Crypto.Hash import SHA256
+from eth_account import Account
 
 # class Signup(generic.CreateView):
 #     form_class = UserCreationForm
@@ -25,7 +28,7 @@ def Signup(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'sign up successful')
-            return redirect('login')
+            return redirect('bc_signature:login')
     else:
             form = UserCreationForm()
     return render(request, 'signup.html',{'form':form})
@@ -44,7 +47,7 @@ def RegisterWallet(request):
         result , list_user_id_in_wallets = check_wallet_account_exist(id_user)
         if not result:
             wallet = models.WalletAccount() 
-            rep = requests.post(f'http://172.30.0.1:2202/account/{id_user}')
+            rep = requests.post(f'http://172.30.0.1:2201/account/{id_user}')
             data = rep.json()
             # save json in models:
             wallet.user = u
@@ -79,11 +82,25 @@ def ResgisterRSA(request):
             rsa_key.user = u
             rsa_key.rsa_private_key = prikey.exportKey().decode() # save the key in DB by String
             rsa_key.rsa_public_key  = pubkey.exportKey().decode()
-            print('sau khi luu vao DB',type(rsa_key.rsa_private_key)) # <class 'bytes'>
+            print("ahhihi  = ", prikey.exportKey().decode())
+            print('sau khi luu vao DB',rsa_key.rsa_private_key)# <class 'bytes'>
             rsa_key.save()
             print('sau khi luu vao DB 2 ',type(rsa_key.rsa_private_key)) # <class 'bytes'>
             data = f'publickey = {pubkey} and private key = {prikey}'
         else:
+            prikey = RSA.generate(1024)
+            print(prikey)
+            a = prikey.exportKey().decode()
+            print(a)
+            
+            b = RSA.importKey(a)
+            print(b)
+            message = 'ahihi'
+            print( "saiiii")
+            # h = SHA256.new(message.encode())
+            # sign = pkcs1_15.new(b).sign(h)
+            sig = prikey.sign(message.encode(),10)
+            print(sign)
             data = 'user already have an rsa keypair  '
             info = ""
             for item in list_user_id_has_rsa_key:
@@ -133,29 +150,59 @@ def sign_contract(request):
         if request.user.is_authenticated:
             id_user = request.user.id
             u = models.User.objects.get(id=id_user)
+            print("user hien tai : ", u.username)
             result_rsa, list_user_id_has_rsa_key = check_RSA_account_exist(id_user)
             result_wallet , list_user_id_in_wallets = check_wallet_account_exist(id_user)
             if result_rsa and result_wallet:
+                print("ahihi 1")
                 # sign use private key
                 for item in list_user_id_has_rsa_key:
                     if id_user == item:
+                        print("ahihi")
                         i = models.RSAAccount.objects.get(user=u)
-                        
+                        print( "i  = ", i.rsa_public_key)
+                        pub = i.rsa_public_key
                         pri = i.rsa_private_key
                         
+                        pub_import = RSA.importKey(pub)
                         pri_import = RSA.importKey(pri)
-                        
-                        signature = pri_import.sign(content.encode(),10)
-                        print(signature)
+                        print("ahihi")
+                        print( pub_import)
+                        print(type(pri_import))
+                        print( pri_import)
+                        print("SI")
+                        # signature = pri_import.sign(content.encode(),10)
+                        h = SHA256.new(content.encode())
+                        signature = pkcs1_15.new(pri_import).sign(h) # bytes
+            
+                        print (" signature = ", signature)
                         print(type(signature))
-                        print(type(json.dumps(signature)))
-                        signature_json = json.dumps(signature).encode()
-                        print("signature_json = ", signature_json)
-                        print(signature_json)
-                        print(type(signature_json))
+
+                        print(signature.hex())
+                        print('ihihi', content)
+                        # signature_json = json.dumps(signature).encode()
+                        # print("signature_json = ", signature_json)
+                        # print(signature_json)
+                        # print(type(signature_json))
+                        # verify:
                         
+                        # chyen signature tu bytes thanh string
+                        # signature_json_ = signature_json.decode()
+
+                        # chuuyen signature tu string thanh list
+                        # sign = json.loads(signature_json)
+
+                        # chuyen signature tu list thanh tuple:
+                        # sign1 = tuple(sign)
+
+                        # result = pub_import.verify(content.encode(), sign1)
+                        h = SHA256.new(content.encode())
+                        print(h)
+                        result = pkcs1_15.new(pub_import).verify(h,signature)
+                        print(" ket qua: ", result)
                         # save on blokchhain: 
                         if result:
+                            print(" dung roi:")
                             wallet = models.WalletAccount.objects.get(user=u)
                             print(wallet.wallet_account)
                             transaction = {
@@ -170,6 +217,7 @@ def sign_contract(request):
                                     'username': u.username
                                 }
                             }
+                            print("Transaction moi: ", transaction)
                             rep = requests.post('http://172.30.0.1:2201/transactions', headers=headers, data= json.dumps(transaction))
                             data = rep.json()
             
@@ -186,29 +234,40 @@ def sign_contract(request):
 
 
 def list_transaction_by_account(request):
-    mess = ''
-    wallet = models.WalletAccount.objects.get(user=request.user)
-    account = wallet.wallet_account
-    rep = requests.get(f'http://172.30.0.1:2201/transactions/{account}')
-    data = rep.text
-    print(type(data))
-    data = json.loads(data)
-    print("dât = ", data['result'])
+    result , list_user_id_in_wallets = check_wallet_account_exist(request.user.id)
+    print( result , ' dsdsds , ', list_user_id_in_wallets[0])
+    if result:
+        mess = ''
+        wallet = models.WalletAccount.objects.get(user=request.user)
+        account = wallet.wallet_account
+        # account = '0x26ADdBcD2c9A2186C75b676c857ea10D1d4e5e2D'
+        print(" ac = ", account)
+        rep = requests.get(f'http://172.30.0.1:2201/transactions/{account}')
+        data = rep.text
+        print( "adddddd  ", data)
+        print(type(data))
+        data = json.loads(data)
+        print("dât = ", data['result'])
 
-    print(type(data['result']))
-    list_info_transaction = data['result']
-    print(type(list_info_transaction))
-    username = request.user.username
-    if len(list_info_transaction) == 0:
-        mess = f'User @{username} does not have any transaction yet'
-    for i in list_info_transaction:
-        print(" thong tin = ", i['transaction_hash'])
+        print(type(data['result']))
+        list_info_transaction = data['result']
+        print(type(list_info_transaction))
+        username = request.user.username
+        if len(list_info_transaction) == 0:
+            mess = f'User @{username} does not have any transaction yet'
+        for i in list_info_transaction:
+            print(" thong tin = ", i['transaction_hash'])
 
-    return render(request, 'get_transactions.html', {
-        'user': request.user,
-        'mess': mess,
-        'list_info_transaction':list_info_transaction})
+        return render(request, 'get_transactions.html', {
+            'user': request.user,
+            'mess': mess,
+            'list_info_transaction':list_info_transaction})
+    else:
+        return render(request,'get_transactions.html', {
+            'user': request.user,
+            'mess': "User does not have a wallet account yet"
 
+        })
 
 
 def detail_transaction(request, transaction_hash):
@@ -263,3 +322,20 @@ def check_signature(request, transaction_hash):
         'info':info_1_transaction
         })
 
+
+def sign_transaction(request):
+    wallet = models.WalletAccount.objects.get(user = request.user)
+    transaction = {
+        'from': wallet.wallet_account,
+        'value':123,
+        'gas':1000000,
+        'gasPrice':200,
+        'nonce':0,
+        'chainId':1996
+    }
+    signed = Account.signTransaction(transaction, wallet.wallet_private_key)
+    print("ket qua: ", signed)
+    print(signed['rawTransaction'].hex())
+    print(type(signed['rawTransaction'].hex()))
+    return render(request, 'base.html', {'signed': signed['rawTransaction'].hex()
+        })

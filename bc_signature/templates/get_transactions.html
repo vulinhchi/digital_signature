@@ -6,10 +6,8 @@
 <h3 style="color:indianred">{{ mess }}</h3>
 {% for i in list_info_transaction %}
 
- <li> 
+ 
         <a href="{% url 'bc_signature:detail_transaction' i.transaction_hash %}"> {{ i.transaction_hash }}
         </a>
-
-</li>
 {% endfor %}
 {% endblock %}

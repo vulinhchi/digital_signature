@@ -153,16 +153,16 @@ hr {
 	background-color: #343b42;
 }
 /*
- Section */
+ Section    rgb(84,208,221)*/
 .intro {
 	display: table;
 	width: 100%;
 	height: 1100px;
 	padding: 0;
 	text-align: center;
-	background: url(../img/portfolio/06-small.jpg) no-repeat  ;
+	/* background: url(../img/portfolio/03-small.jpg) no-repeat  ; */
 
-	/* background-color: rgb(84,208,221); */
+	background-color: rgb(84,199,88);
 	-webkit-background-size: cover;
 	-moz-background-size: cover;
 	background-size: cover;
