@@ -14,6 +14,7 @@ from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA
 from eth_account import Account
+import base64
 
 # class Signup(generic.CreateView):
 #     form_class = UserCreationForm
@@ -106,11 +107,17 @@ def ResgisterRSA(request):
             # sig = prikey.sign(message.encode(),10)
             
             print(signature)
+            print(type(signature))
             # save in DB : 
-            luu = signature.hex() # type = str
+            # luu = signature.hex() # type = str
+            luu = base64.b64encode(signature)
+            sign = luu.decode() # str >> save
+            
             # verify:
+            sign1 = sign.encode() # byte
+            signatue_ = base64.b64decode(sign1)
             verifier = PKCS1_v1_5.new(pubkey)
-            kq = verifier.verify(h, signature)
+            kq = verifier.verify(h, signatue_)
             print("ket qua = ",kq)
             data = 'user already have an rsa keypair  '
             info = ""
@@ -176,12 +183,7 @@ def sign_contract(request):
                         
                         pub_import = RSA.importKey(pub)
                         pri_import = RSA.importKey(pri)
-                        print("ahihi")
-                        print( pub_import)
-                        print(type(pri_import))
-                        print('new one 1')
-                        print( pri_import)
-
+                        
                         h = SHA.new(content.encode())
                         print( " h = ", h)
                         signer = PKCS1_v1_5.new(pri_import)
@@ -190,7 +192,10 @@ def sign_contract(request):
                         print ( " signature: ")
                         print(signature)
                         
-                        luu = signature.hex() # type = str
+                        luu = base64.b64encode(signature)
+                        sign = luu.decode() # str >> save
+                        print ("sign = ")
+                        print(sign)
                         # verify:
                         verifier = PKCS1_v1_5.new(pub_import)
                         result = verifier.verify(h, signature)
@@ -225,7 +230,7 @@ def sign_contract(request):
                                 'data':
                                 {
                                     'text': content,
-                                    'signature': signature.hex(),
+                                    'signature': sign,
                                     'public_key': pub,
                                     'user_id': id_user,
                                     'username': u.username
@@ -317,19 +322,17 @@ def check_signature(request, transaction_hash):
     pub_import = RSA.importKey(info_1_transaction['data']['public_key'].encode())
     # verify:
     print("verify: ")
+    h = SHA.new(content.encode())
+            
     # chuyen signature tu bytes >> string
-    signature_json_ = info_1_transaction['data']['signature']
-    print("signature_json_", signature_json_)
+    signature_string = info_1_transaction['data']['signature']
+   
     # print(type(signature_json))
 
-    # chuyen signature tu string thanh list
-    sign = json.loads(signature_json_)
-    print("sign = ", sign)
-    # print(type(sign))
-
-    # chuyen signature tu list thanh tuple >> verify okie
-    sign1 = tuple(sign)
-    result = pub_import.verify(content.encode(),sign)
+    sign1 = signature_string.encode() # bytes
+    signatue_ = base64.b64decode(sign1)
+    verifier = PKCS1_v1_5.new(pub_import)
+    result = verifier.verify(h, signatue_)
     print("ket qua: ", result)
     return render(request, 'detail_transaction.html', {
         'verify':result,
