@@ -11,8 +11,8 @@ import requests
 from bc_signature import models
 import json
 from Crypto.PublicKey import RSA
-# from Crypto.Signature import pkcs1_15
-# from Crypto.Hash import SHA256
+from Crypto.Signature import PKCS1_v1_5
+from Crypto.Hash import SHA
 from eth_account import Account
 
 # class Signup(generic.CreateView):
@@ -89,18 +89,29 @@ def ResgisterRSA(request):
             data = f'publickey = {pubkey} and private key = {prikey}'
         else:
             prikey = RSA.generate(1024)
+            pubkey = prikey.publickey()
             print(prikey)
             a = prikey.exportKey().decode()
+            print(" sau khi exportKey : ")
             print(a)
-            
+            print(" sau khi import prikey: ")
             b = RSA.importKey(a)
             print(b)
+
             message = 'ahihi'
             print( "saiiii")
-            # h = SHA256.new(message.encode())
-            # sign = pkcs1_15.new(b).sign(h)
-            sig = prikey.sign(message.encode(),10)
-            print(sign)
+            h = SHA.new(message.encode())
+            signer = PKCS1_v1_5.new(prikey)
+            signature = signer.sign(h)
+            # sig = prikey.sign(message.encode(),10)
+            
+            print(signature)
+            # save in DB : 
+            luu = signature.hex() # type = str
+            # verify:
+            verifier = PKCS1_v1_5.new(pubkey)
+            kq = verifier.verify(h, signature)
+            print("ket qua = ",kq)
             data = 'user already have an rsa keypair  '
             info = ""
             for item in list_user_id_has_rsa_key:
@@ -158,7 +169,6 @@ def sign_contract(request):
                 # sign use private key
                 for item in list_user_id_has_rsa_key:
                     if id_user == item:
-                        print("ahihi")
                         i = models.RSAAccount.objects.get(user=u)
                         print( "i  = ", i.rsa_public_key)
                         pub = i.rsa_public_key
@@ -169,17 +179,24 @@ def sign_contract(request):
                         print("ahihi")
                         print( pub_import)
                         print(type(pri_import))
+                        print('new one 1')
                         print( pri_import)
-                        print("SI")
-                        # signature = pri_import.sign(content.encode(),10)
-                        h = SHA256.new(content.encode())
-                        signature = pkcs1_15.new(pri_import).sign(h) # bytes
-            
-                        print (" signature = ", signature)
-                        print(type(signature))
 
-                        print(signature.hex())
-                        print('ihihi', content)
+                        h = SHA.new(content.encode())
+                        print( " h = ", h)
+                        signer = PKCS1_v1_5.new(pri_import)
+                        signature = signer.sign(h)
+                        # sig = prikey.sign(message.encode(),10)
+                        print ( " signature: ")
+                        print(signature)
+                        
+                        luu = signature.hex() # type = str
+                        # verify:
+                        verifier = PKCS1_v1_5.new(pub_import)
+                        result = verifier.verify(h, signature)
+                        print("ket qua = ",result)
+                       
+                        
                         # signature_json = json.dumps(signature).encode()
                         # print("signature_json = ", signature_json)
                         # print(signature_json)
@@ -196,10 +213,7 @@ def sign_contract(request):
                         # sign1 = tuple(sign)
 
                         # result = pub_import.verify(content.encode(), sign1)
-                        h = SHA256.new(content.encode())
-                        print(h)
-                        result = pkcs1_15.new(pub_import).verify(h,signature)
-                        print(" ket qua: ", result)
+                        
                         # save on blokchhain: 
                         if result:
                             print(" dung roi:")
@@ -211,7 +225,7 @@ def sign_contract(request):
                                 'data':
                                 {
                                     'text': content,
-                                    'signature': signature_json_,
+                                    'signature': signature.hex(),
                                     'public_key': pub,
                                     'user_id': id_user,
                                     'username': u.username
