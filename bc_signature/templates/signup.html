@@ -4,13 +4,6 @@
 {% load static %}
 {% block content %}
 
-<div class="body_signup"></div>
-	<div class="grad"></div>
-	<div class="header">
-
-		<div>Accounts<span>Signup</span></div>
-	</div>
-	<br>
 <div class="login">
   <h2>Sign up</h2>
   
@@ -27,9 +20,10 @@
 	    </div>
 	{% endfor %}
 		<br/>
-  <button type="submit">Sign up</button>
+  <button type="submit" class="btn egames-btn mt-30"> Sign up</button>
 </form>
 
+	
 	<a href="{% url 'bc_signature:login' %}"> login</a>
 </div>
 {% endblock %}

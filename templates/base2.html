@@ -1,0 +1,253 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>{% block title %}HOME{% endblock %}</title>
+<!-- Bootstrap -->
+<link rel="stylesheet" type="text/css"  href="{% static '/css/bootstrap.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static '/fonts/font-awesome/css/font-awesome.css' %}">
+
+<!-- Stylesheet
+    ================================================== -->
+
+<link rel="stylesheet" type="text/css"  href="{% static '/css/style.css' %}">
+<!-- <link rel="stylesheet" type="text/css" href="{% static '/css/nivo-lightbox/nivo-lightbox.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static '/css/nivo-lightbox/default.css' %}"> -->
+<!-- <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800,600,300' rel='stylesheet' type='text/css'> -->
+
+<!-- login form -->
+<link rel="stylesheet" type="text/css"  href="{% static '/css/login_style.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static '/css/util.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static '/css/main.css' %}">
+</head>
+<body id="page-top" data-spy="scroll" data-target=".navbar-fixed-top">
+<!-- Navigation
+    ==========================================-->
+<nav id="menu" class="navbar navbar-default navbar-fixed-top">
+  <div class="container">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+    
+        <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="{% url 'bc_signature:home' %}" class="page-scroll">Home</a></li>
+          {% if user.is_authenticated %}
+          
+          <li><a href="{% url 'bc_signature:logout' %}">Logout </a></li>
+          
+          <li><a href="{% url 'bc_signature:get_wallet' %}">get wallet account </a></li>
+          <li><a href="{% url 'bc_signature:get_rsa_account' %}">get RSA key pair </a></li>
+          <li><a href="{% url 'bc_signature:sign' %}">Sign contract</a></li>
+          <li><a href="{% url 'bc_signature:my_transactions' %}">My transactions</a></li>
+          
+          <li><a href="{% url 'bc_signature:sign_transaction' %}">Sign transactions</a></li>
+          {% else %}
+       
+        <li>  <a href="{% url 'bc_signature:login' %}">login</a> </li>
+        <li>  <a href="{% url 'bc_signature:signup' %}">signup</a> </li>
+        {% endif %}
+        
+      </ul>
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container-fluid -->
+</nav>
+
+<!-- About Section -->
+<div id="about">
+  <div class="container">
+    <div class="section-title text-center center">
+      <h2>Account</h2>
+      <hr>
+    </div>
+    <div class="row">
+      <!-- <div class="col-xs-12 col-md-6"> <img src="{% static '/img/about.jpg' %}" class="img-responsive" alt=""> </div> -->
+      <div class="col-xs-12 col-md-6">
+        <div class="about-text">
+            {% if user.is_authenticated %}
+            <h2>Hi {{ user.username }}</h2>
+
+              {% block all_user %}
+              {% endblock %}
+              {{ signed }}
+              {% block sign %}
+             
+              {% endblock %}
+
+              {% block wallet %}
+              
+              {% endblock %}
+              {% block transaction %}
+              
+              {% endblock %}
+
+              {% block detail_transaction %}
+              {% endblock %}
+          {% endif %}
+          
+
+          {% block content %}
+          
+          {% endblock %}
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Portfolio Section -->
+<div id="portfolio">
+  <div class="container">
+    <div class="section-title text-center center">
+      <h2>Portfolio</h2>
+      <hr>
+    </div>
+    <div class="categories">
+      <ul class="cat">
+        <li>
+          <ol class="type">
+            <li><a href="#" data-filter="*" class="active">All</a></li>
+            <li><a href="#" data-filter=".web">Web Design</a></li>
+            <li><a href="#" data-filter=".photography">Photography</a></li>
+            <li><a href="#" data-filter=".product">Product Design</a></li>
+          </ol>
+        </li>
+      </ul>
+      <div class="clearfix"></div>
+    </div>
+    <div class="row">
+      <div class="portfolio-items">
+        <div class="col-sm-6 col-md-3 col-lg-3 web">
+          <div class="portfolio-item">
+            <div class="hover-bg"> <a href="{% static '/img/portfolio/01-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
+              <div class="hover-text">
+                <h4>Project Title</h4>
+              </div>
+              <img src="{% static '/img/portfolio/01-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-3 col-lg-3 product">
+          <div class="portfolio-item">
+            <div class="hover-bg"> <a href="{% static '/img/portfolio/02-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
+              <div class="hover-text">
+                <h4>Project Title</h4>
+              </div>
+              <img src="{% static '/img/portfolio/02-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-3 col-lg-3 web">
+          <div class="portfolio-item">
+            <div class="hover-bg"> <a href="{% static '/img/portfolio/03-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
+              <div class="hover-text">
+                <h4>Project Title</h4>
+              </div>
+              <img src="{% static '/img/portfolio/03-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-3 col-lg-3 web">
+          <div class="portfolio-item">
+            <div class="hover-bg"> <a href="{% static '/img/portfolio/04-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
+              <div class="hover-text">
+                <h4>Project Title</h4>
+              </div>
+              <img src="{% static '/img/portfolio/04-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-3 col-lg-3 product">
+          <div class="portfolio-item">
+            <div class="hover-bg"> <a href="{% static '/img/portfolio/05-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
+              <div class="hover-text">
+                <h4>Project Title</h4>
+              </div>
+              <img src="{% static '/img/portfolio/05-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-3 col-lg-3 photography">
+          <div class="portfolio-item">
+            <div class="hover-bg"> <a href="{% static '/img/portfolio/06-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
+              <div class="hover-text">
+                <h4>Project Title</h4>
+              </div>
+              <img src="{% static '/img/portfolio/06-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-3 col-lg-3 photography">
+          <div class="portfolio-item">
+            <div class="hover-bg"> <a href="{% static '/img/portfolio/07-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
+              <div class="hover-text">
+                <h4>Project Title</h4>
+              </div>
+              <img src="{% static '/img/portfolio/07-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-3 col-lg-3 web">
+          <div class="portfolio-item">
+            <div class="hover-bg"> <a href="{% static '/img/portfolio/08-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
+              <div class="hover-text">
+                <h4>Project Title</h4>
+              </div>
+              <img src="{% static '/img/portfolio/08-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-3 col-lg-3 product">
+          <div class="portfolio-item">
+            <div class="hover-bg"> <a href="{% static '/img/portfolio/09-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
+              <div class="hover-text">
+                <h4>Project Title</h4>
+              </div>
+              <img src="{% static '/img/portfolio/09-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-3 col-lg-3 photography">
+          <div class="portfolio-item">
+            <div class="hover-bg"> <a href="{% static '/img/portfolio/10-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
+              <div class="hover-text">
+                <h4>Project Title</h4>
+              </div>
+              <img src="{% static '/img/portfolio/10-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-3 col-lg-3 photography">
+          <div class="portfolio-item">
+            <div class="hover-bg"> <a href="{% static '/img/portfolio/11-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
+              <div class="hover-text">
+                <h4>Project Title</h4>
+              </div>
+              <img src="{% static '/img/portfolio/11-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-3 col-lg-3 web">
+          <div class="portfolio-item">
+            <div class="hover-bg"> <a href="{% static '/img/portfolio/12-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
+              <div class="hover-text">
+                <h4>Project Title</h4>
+              </div>
+              <img src="{% static '/img/portfolio/12-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer">
+  <div class="container text-center">
+    <div class="fnav">
+      <p>Copyright &copy; 2016 Spectrum. Designed by <a href="http://www.templatewire.com" rel="nofollow">TemplateWire</a></p>
+    </div>
+  </div>
+</div>
+<script type="text/javascript" src="{% static '/js/jquery.1.11.1.js' %}"></script>
+<script type="text/javascript" src="{% static '/js/bootstrap.js' %}"></script>
+<script type="text/javascript" src="{% static '/js/SmoothScroll.js' %}"></script>
+<script type="text/javascript" src="{% static '/js/nivo-lightbox.js' %}"></script>
+<script type="text/javascript" src="{% static '/js/jquery.isotope.js' %}"></script>
+<script type="text/javascript" src="{% static '/js/jqBootstrapValidation.js' %}"></script>
+<!-- dòng này làm cho k nhấp được login vs signup -->
+<!-- <script type="text/javascript" src="{% static '/js/contact_me.js' %}"></script> -->
+<script type="text/javascript" src="{% static '/js/main.js' %}"></script>
+</body>
+</html>

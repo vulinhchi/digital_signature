@@ -1,264 +1,318 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
- <title>{% block title %}HOME{% endblock %}</title>
-<!-- Bootstrap -->
-<link rel="stylesheet" type="text/css"  href="{% static '/css/bootstrap.css' %}">
-<link rel="stylesheet" type="text/css" href="{% static '/fonts/font-awesome/css/font-awesome.css' %}">
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- The above 4 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
-<!-- Stylesheet
-    ================================================== -->
+    <!-- Title -->
+    <title>{% block title %}HOME{% endblock %}</title>
 
-<link rel="stylesheet" type="text/css"  href="{% static '/css/style.css' %}">
-<link rel="stylesheet" type="text/css" href="{% static '/css/nivo-lightbox/nivo-lightbox.css' %}">
-<link rel="stylesheet" type="text/css" href="{% static '/css/nivo-lightbox/default.css' %}">
-<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800,600,300' rel='stylesheet' type='text/css'>
+    <!-- Favicon -->
+    <link rel="icon" href="{% static '/img/core-img/favicon.ico' %}">
 
-<!-- login form -->
-<link rel="stylesheet" type="text/css"  href="{% static '/css/login_style.css' %}">
-<!-- catch error form -->
-<script src='https://www.google.com/recaptcha/api.js'></script>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{% static '/style.css' %}">
 
 </head>
-<body id="page-top" data-spy="scroll" data-target=".navbar-fixed-top">
-<!-- Navigation
-    ==========================================-->
-<nav id="menu" class="navbar navbar-default navbar-fixed-top">
-  <div class="container">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
+
+<body>
+    <!-- Preloader -->
+    <div class="preloader d-flex align-items-center justify-content-center">
+        <div class="spinner">
+            <div class="bounce1"></div>
+            <div class="bounce2"></div>
+            <div class="bounce3"></div>
+        </div>
+    </div>
+
+    <!-- ##### Header Area Start ##### -->
+    <header class="header-area wow fadeInDown" data-wow-delay="500ms">
+        <!-- Top Header Area -->
+        <div class="top-header-area">
+            <div class="container h-100">
+                <div class="row h-100 align-items-center">
+                    <div class="col-12 d-flex align-items-center justify-content-between">
+                        <!-- Logo Area -->
+                        <div class="logo">
+                                
+                            <a href="{% url 'bc_signature:home' %}"><img src="{% static '/img/core-img/bc.png' %}" alt=""></a>
+                           
+                           
+                        </div>
+
+                        <!-- Search & Login Area -->
+                        <div class="search-login-area d-flex align-items-center">
+                            <!-- Top Search Area -->
+                           
+                            <!-- Login Area -->
+                            {% if request.user and user.is_authenticated %}
+                            <div class="login-area">
+                                <a href="{% url 'bc_signature:logout' %}"><span>Logout</span> <i class="fa fa-lock" aria-hidden="true"></i></a>
+                                
+                            </div>
+                            
+                            {% else %} -->
+                            <!-- <div class="login-area">
+                            
+                                    <a href="{% url 'bc_signature:login' %}"><span>Login / Register</span> <i class="fa fa-lock" aria-hidden="true"></i></a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navbar Area -->
+        <div class="egames-main-menu" id="sticker">
+            <div class="classy-nav-container breakpoint-off">
+                <div class="container">
+                    <!-- Menu -->
+                    <nav class="classy-navbar justify-content-between" id="egamesNav">
+
+                        <!-- Navbar Toggler -->
+                        <div class="classy-navbar-toggler">
+                            <span class="navbarToggler"><span></span><span></span><span></span></span>
+                        </div>
+
+                        <!-- Menu -->
+                        <div class="classy-menu">
+
+                            <!-- Close Button -->
+                            <div class="classycloseIcon">
+                                <div class="cross-wrap"><span class="top"></span><span class="bottom"></span></div>
+                            </div>
+
+                            <!-- Nav Start -->
+                            <div class="classynav">
+                                <ul>
+                                    <li><a href="{% url 'bc_signature:home' %}">Home</a></li>
+                                    {% if request.user and user.is_authenticated %}
+                                    <li><a href="#">Accounts</a>
+                                        <ul class="dropdown">
+                                            <li><a href="{% url 'bc_signature:get_wallet' %}">Wallet account</a></li>
+                                            <li><a href="{% url 'bc_signature:get_rsa_account' %}">RSA key pair</a></li>
+                                        </ul>
+                                    </li>
+                                    <li><a href="{% url 'bc_signature:sign' %}">Sign Contract</a>
+                                    </li>
+                                    <li><a href="{% url 'bc_signature:my_transactions' %}">My transactions</a>
+                                        
+                                    </li>
+                                    <li><a href="{% url 'bc_signature:sign_transaction' %}">Sign transaction</a>
+                                    </li>
+                                    
+                                    {% endif %}
+
+                                </ul>
+                            </div>
+                            <!-- Nav End -->
+                        </div>
+
+                        <!-- Top Social Info -->
+                        <div class="top-social-info">
+                            {% if request.user and user.is_authenticated %}
+                            <a href="#" data-toggle="tooltip" data-placement="top" title="User {{user.username}}"><i class="fa fa-user" aria-hidden="true"></i></a>
+                            <span>{{ user.username }}</span>
+                            <a href="{% url 'bc_signature:logout' %}" data-toggle="tooltip" data-placement="top" title="logout"><i class="fa fa-sign-out" aria-hidden="true"></i></a>
+                            {% else %}
+                            
+                            <a href="{% url 'bc_signature:login' %}" data-toggle="tooltip" data-placement="top" title="Login"><i class="fa fa-sign-in" aria-hidden="true"></i></a>
+                            <a href="{% url 'bc_signature:signup' %}" data-toggle="tooltip" data-placement="top" title="Register"><i class="fa fa-registered" aria-hidden="true"></i></a>
+                           {% endif %}
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- ##### Header Area End ##### -->
+    {% block detail_transaction %}
+    {% endblock %}
+    {{ signed }}
+    <!-- ##### Video Area Start ##### -->
+    <div class="egames-video-area section-padding-100 bg-pattern2">
+        <div class="container">
+            <div class="row no-gutters">
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="egames-nav-btn">
+                        <div class="nav flex-column" id="video-tab" role="tablist" aria-orientation="vertical">
+                               
+                            <!-- all_user.html start -->
+                            {% block all_user %}
+                            {% endblock %}
+                             <!-- all_user.html stop -->
+                            
+                            
+                         
+                        </div>
+                    </div>
+                </div>
+
+               
+                <div class="col-12 col-md-6 col-lg-8">
+                    
+                    <div class="tab-content" id="video-tabContent">
+                        
+                        <div class="tab-pane fade show active" id="video-1" role="tabpanel" aria-labelledby="video1">
+                           
+                            <div class="video-playground bg-img" style="background-image: url(img/bg-img/45.jpg);">
+                                <!-- Play Button -->
+                                <!-- get_transactions.html start -->
+                                {% block transaction %}
+                            
+                                {% endblock %}
+                                    <!-- get_transactions.html -->
+
+                                {% block content %}
+                                {% endblock %}
+                                
+                                {% block wallet %}
+                                {% endblock %}
+                                
+                                {% block sign %}
+                                {% endblock %}
+
+                                
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    <!-- ##### Video Area End ##### -->
+
     
-        <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="{% url 'bc_signature:home' %}" class="page-scroll">Home</a></li>
-        {% if user.is_authenticated %}
-          <li>Hello {{ user.username }}</li>
-          <li><a href="{% url 'bc_signature:logout' %}">Logout </a></li>
-          
-          <li><a href="{% url 'bc_signature:get_wallet' %}">get wallet account </a></li>
-          <li><a href="{% url 'bc_signature:get_rsa_account' %}">get RSA key pair </a></li>
-          <li><a href="{% url 'bc_signature:sign' %}">Sign contract</a></li>
-          <li><a href="{% url 'bc_signature:my_transactions' %}">My transactions</a></li>
-          
-          <li><a href="{% url 'bc_signature:sign_transaction' %}">Sign transactions</a></li>
-          {% else %}
-       
-        <li>  <a href="{% url 'bc_signature:login' %}">login</a> </li>
-        <li>  <a href="{% url 'bc_signature:signup' %}">signup</a> </li>
-        {% endif %}
-        
-      </ul>
-    </div>
-    <!-- /.navbar-collapse -->
-  </div>
-  <!-- /.container-fluid -->
-</nav>
-<!-- Header -->
-<header id="header">
-  <div class="intro">
-    <div class="container">
-      <div class="row">
-        <div class="intro-text">
-          {% if user.is_authenticated %}
-            <h2>Hi {{ user.username }}</h2>
-               thong tin : {{ signed }}
-              {% block sign %}
-             
-              {% endblock %}
 
-              {% block wallet %}
-              
-              {% endblock %}
-              {% block transaction %}
-              
-              {% endblock %}
+    <!-- ##### Footer Area Start ##### -->
+    <footer class="footer-area">
+        <!-- Main Footer Area -->
+        <div class="main-footer-area section-padding-100-0">
+            <div class="container">
+                <div class="row">
+                    <!-- Single Footer Widget -->
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="single-footer-widget mb-70 wow fadeInUp" data-wow-delay="100ms">
+                            <div class="widget-title">
+                                <a href="index.html"><img src="img/core-img/logo2.png" alt=""></a>
+                            </div>
+                            <div class="widget-content">
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris velit arcu, scelerisque dignissim massa quis, mattis facilisis erat. Aliquam erat volutpat. Sed efficitur diam ut interdum ultricies.</p>
+                            </div>
+                        </div>
+                    </div>
 
-              {% block detail_transaction %}
-              {% endblock %}
-          {% endif %}
-          
+                    <!-- Single Footer Widget -->
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="single-footer-widget mb-70 wow fadeInUp" data-wow-delay="300ms">
+                            <div class="widget-title">
+                                <h4>Game Reviews</h4>
+                            </div>
+                            <div class="widget-content">
+                                <nav>
+                                    <ul>
+                                        <li><a href="#">Doom</a></li>
+                                        <li><a href="#">Grand Theft Auto</a></li>
+                                        <li><a href="#">Bloodborne</a></li>
+                                        <li><a href="#">God of war</a></li>
+                                        <li><a href="#">Persona 5</a></li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
 
-          {% block content %}
-          
-          {% endblock %}
+                    <!-- Single Footer Widget -->
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="single-footer-widget mb-70 wow fadeInUp" data-wow-delay="500ms">
+                            <div class="widget-title">
+                                <h4>Usefull Links</h4>
+                            </div>
+                            <div class="widget-content">
+                                <nav>
+                                    <ul>
+                                        <li><a href="#">Testimanials</a></li>
+                                        <li><a href="#">Reviews</a></li>
+                                        <li><a href="#">New Games</a></li>
+                                        <li><a href="#">Forum</a></li>
+                                        <li><a href="#">Contact</a></li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
 
-      </div>
-    </div>
-  </div>
-</header>
-<!-- About Section -->
-<div id="about">
-  <div class="container">
-    <div class="section-title text-center center">
-      <h2>Account</h2>
-      <hr>
-    </div>
-    <div class="row">
-      <div class="col-xs-12 col-md-6"> <img src="{% static '/img/about.jpg' %}" class="img-responsive" alt=""> </div>
-      <div class="col-xs-12 col-md-6">
-        <div class="about-text">
-          <h2> ứng dụng chữ kí số dựa trên blockchain </h2>
+                    <!-- Single Footer Widget -->
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="single-footer-widget mb-70 wow fadeInUp" data-wow-delay="700ms">
+                            <div class="widget-title">
+                                <h4>What’s new</h4>
+                            </div>
+                            <div class="widget-content">
+                                <nav>
+                                    <ul>
+                                        <li><a href="#">Doom</a></li>
+                                        <li><a href="#">Grand Theft Auto</a></li>
+                                        <li><a href="#">Bloodborne</a></li>
+                                        <li><a href="#">God of war</a></li>
+                                        <li><a href="#">Persona 5</a></li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <!-- Copywrite Area -->
+        <div class="copywrite-content">
+            <div class="container h-100">
+                <div class="row h-100 align-items-center">
+                    <div class="col-12 col-sm-5">
+                        <!-- Copywrite Text -->
+                        <p class="copywrite-text"><a href="#"><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+</p>
+                    </div>
+                    <div class="col-12 col-sm-7">
+                        <!-- Footer Nav -->
+                        <div class="footer-nav">
+                            <ul>
+                                <li><a href="index.html">Home</a></li>
+                                <li><a href="game-review.html">Games</a></li>
+                                <li><a href="post.html">Articles</a></li>
+                                <li><a href="single-game-review.html">Reviews</a></li>
+                                <li><a href="contact.html">Contact</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- ##### Footer Area End ##### -->
 
-      </div>
-    </div>
-  </div>
-</div>
-<!-- Portfolio Section -->
-<div id="portfolio">
-  <div class="container">
-    <div class="section-title text-center center">
-      <h2>Portfolio</h2>
-      <hr>
-    </div>
-    <div class="categories">
-      <ul class="cat">
-        <li>
-          <ol class="type">
-            <li><a href="#" data-filter="*" class="active">All</a></li>
-            <li><a href="#" data-filter=".web">Web Design</a></li>
-            <li><a href="#" data-filter=".photography">Photography</a></li>
-            <li><a href="#" data-filter=".product">Product Design</a></li>
-          </ol>
-        </li>
-      </ul>
-      <div class="clearfix"></div>
-    </div>
-    <div class="row">
-      <div class="portfolio-items">
-        <div class="col-sm-6 col-md-3 col-lg-3 web">
-          <div class="portfolio-item">
-            <div class="hover-bg"> <a href="{% static '/img/portfolio/01-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
-              <div class="hover-text">
-                <h4>Project Title</h4>
-              </div>
-              <img src="{% static '/img/portfolio/01-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-3 col-lg-3 product">
-          <div class="portfolio-item">
-            <div class="hover-bg"> <a href="{% static '/img/portfolio/02-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
-              <div class="hover-text">
-                <h4>Project Title</h4>
-              </div>
-              <img src="{% static '/img/portfolio/02-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-3 col-lg-3 web">
-          <div class="portfolio-item">
-            <div class="hover-bg"> <a href="{% static '/img/portfolio/03-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
-              <div class="hover-text">
-                <h4>Project Title</h4>
-              </div>
-              <img src="{% static '/img/portfolio/03-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-3 col-lg-3 web">
-          <div class="portfolio-item">
-            <div class="hover-bg"> <a href="{% static '/img/portfolio/04-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
-              <div class="hover-text">
-                <h4>Project Title</h4>
-              </div>
-              <img src="{% static '/img/portfolio/04-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-3 col-lg-3 product">
-          <div class="portfolio-item">
-            <div class="hover-bg"> <a href="{% static '/img/portfolio/05-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
-              <div class="hover-text">
-                <h4>Project Title</h4>
-              </div>
-              <img src="{% static '/img/portfolio/05-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-3 col-lg-3 photography">
-          <div class="portfolio-item">
-            <div class="hover-bg"> <a href="{% static '/img/portfolio/06-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
-              <div class="hover-text">
-                <h4>Project Title</h4>
-              </div>
-              <img src="{% static '/img/portfolio/06-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-3 col-lg-3 photography">
-          <div class="portfolio-item">
-            <div class="hover-bg"> <a href="{% static '/img/portfolio/07-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
-              <div class="hover-text">
-                <h4>Project Title</h4>
-              </div>
-              <img src="{% static '/img/portfolio/07-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-3 col-lg-3 web">
-          <div class="portfolio-item">
-            <div class="hover-bg"> <a href="{% static '/img/portfolio/08-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
-              <div class="hover-text">
-                <h4>Project Title</h4>
-              </div>
-              <img src="{% static '/img/portfolio/08-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-3 col-lg-3 product">
-          <div class="portfolio-item">
-            <div class="hover-bg"> <a href="{% static '/img/portfolio/09-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
-              <div class="hover-text">
-                <h4>Project Title</h4>
-              </div>
-              <img src="{% static '/img/portfolio/09-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-3 col-lg-3 photography">
-          <div class="portfolio-item">
-            <div class="hover-bg"> <a href="{% static '/img/portfolio/10-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
-              <div class="hover-text">
-                <h4>Project Title</h4>
-              </div>
-              <img src="{% static '/img/portfolio/10-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-3 col-lg-3 photography">
-          <div class="portfolio-item">
-            <div class="hover-bg"> <a href="{% static '/img/portfolio/11-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
-              <div class="hover-text">
-                <h4>Project Title</h4>
-              </div>
-              <img src="{% static '/img/portfolio/11-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-3 col-lg-3 web">
-          <div class="portfolio-item">
-            <div class="hover-bg"> <a href="{% static '/img/portfolio/12-large.jpg' %}" title="Project Title" data-lightbox-gallery="gallery1">
-              <div class="hover-text">
-                <h4>Project Title</h4>
-              </div>
-              <img src="{% static '/img/portfolio/12-small.jpg' %}" class="img-responsive" alt="Project Title"> </a> </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="footer">
-  <div class="container text-center">
-    <div class="fnav">
-      <p>Copyright &copy; 2016 Spectrum. Designed by <a href="http://www.templatewire.com" rel="nofollow">TemplateWire</a></p>
-    </div>
-  </div>
-</div>
-<script type="text/javascript" src="{% static '/js/jquery.1.11.1.js' %}"></script>
-<script type="text/javascript" src="{% static '/js/bootstrap.js' %}"></script>
-<script type="text/javascript" src="{% static '/js/SmoothScroll.js' %}"></script>
-<script type="text/javascript" src="{% static '/js/nivo-lightbox.js' %}"></script>
-<script type="text/javascript" src="{% static '/js/jquery.isotope.js' %}"></script>
-<script type="text/javascript" src="{% static '/js/jqBootstrapValidation.js' %}"></script>
-<!-- dòng này làm cho k nhấp được login vs signup -->
-<!-- <script type="text/javascript" src="{% static '/js/contact_me.js' %}"></script> -->
-<script type="text/javascript" src="{% static '/js/main.js' %}"></script>
+    <!-- ##### All Javascript Script ##### -->
+    <!-- jQuery-2.2.4 js -->
+    <script src="{% static '/js/jquery/jquery-2.2.4.min.js' %}"></script>
+    <!-- Popper js -->
+    <script src="{% static '/js/bootstrap/popper.min.js' %}"></script>
+    <!-- Bootstrap js -->
+    <script src="{% static '/js/bootstrap/bootstrap.min.js' %}"></script>
+    <!-- All Plugins js -->
+    <script src="{% static '/js/plugins/plugins.js' %}"></script>
+    <!-- Active js -->
+    <script src="{% static '/js/active.js' %}"></script>
 </body>
+
 </html>

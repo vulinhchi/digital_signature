@@ -56,12 +56,12 @@ def RegisterWallet(request):
             wallet.wallet_account  = data['address']
             wallet.save()
         else:
-            data = 'user already have an wallet account'
+            data = 'user already have an wallet account '
             info = ""
             for item in list_user_id_in_wallets:
                 if id_user == item:
                     i = models.WalletAccount.objects.get(user=u)
-                    info = f"account : {i.wallet_account} and private_key: {i.wallet_private_key}"
+                    info = f"account : {i.wallet_account}"
             data += info
     else:
         data = "User need to log in!"           
@@ -89,36 +89,6 @@ def ResgisterRSA(request):
             print('sau khi luu vao DB 2 ',type(rsa_key.rsa_private_key)) # <class 'bytes'>
             data = f'publickey = {pubkey} and private key = {prikey}'
         else:
-            prikey = RSA.generate(1024)
-            pubkey = prikey.publickey()
-            print(prikey)
-            a = prikey.exportKey().decode()
-            print(" sau khi exportKey : ")
-            print(a)
-            print(" sau khi import prikey: ")
-            b = RSA.importKey(a)
-            print(b)
-
-            message = 'ahihi'
-            print( "saiiii")
-            h = SHA.new(message.encode())
-            signer = PKCS1_v1_5.new(prikey)
-            signature = signer.sign(h)
-            # sig = prikey.sign(message.encode(),10)
-            
-            print(signature)
-            print(type(signature))
-            # save in DB : 
-            # luu = signature.hex() # type = str
-            luu = base64.b64encode(signature)
-            sign = luu.decode() # str >> save
-            
-            # verify:
-            sign1 = sign.encode() # byte
-            signatue_ = base64.b64decode(sign1)
-            verifier = PKCS1_v1_5.new(pubkey)
-            kq = verifier.verify(h, signatue_)
-            print("ket qua = ",kq)
             data = 'user already have an rsa keypair  '
             info = ""
             for item in list_user_id_has_rsa_key:
@@ -127,8 +97,8 @@ def ResgisterRSA(request):
                     pub = i.rsa_public_key
                     pri = i.rsa_private_key
                     
-                    info = f"publickey : {pub} and private_key: {pri}"
-            data += info
+                    # info = f"publickey : {pub} and private_key: {pri}"
+            # data += info
     else:
         data = "User need to log in!"           
     return render(request, 'get_account.html', {'data':data})
@@ -251,8 +221,58 @@ def sign_contract(request):
         return render(request, 'sign_rsa.html')
 
 
+def list_all_user(request):
+    if request.user:
+        users = models.User.objects.exclude(id = request.user.id)
+    else:
+        users = models.User.objects.get.all()
+    print("users: ", users[0])
+    
+    return render(request,'all_user.html', {
+        'users': users
+        
+    })
 
-def list_transaction_by_account(request):
+
+def list_transaction_by_account(request, username):
+    user_ = models.User.objects.get(username = username)
+    result , list_user_id_in_wallets = check_wallet_account_exist(user_.id)
+    print( result , ' dsdsds , ', list_user_id_in_wallets[0])
+    if result:
+        mess = ''
+        wallet = models.WalletAccount.objects.get(user=user_)
+        account = wallet.wallet_account
+        # account = '0x26ADdBcD2c9A2186C75b676c857ea10D1d4e5e2D'
+        print(" ac = ", account)
+        rep = requests.get(f'http://172.30.0.1:2201/transactions/{account}')
+        data = rep.text
+        print( "adddddd  ", data)
+        print(type(data))
+        data = json.loads(data)
+        print("dât = ", data['result'])
+
+        print(type(data['result']))
+        list_info_transaction = data['result']
+        print(type(list_info_transaction))
+        username = user_.username
+        if len(list_info_transaction) == 0:
+            mess = f'User @{username} does not have any transaction yet'
+        for i in list_info_transaction:
+            print(" thong tin = ", i['transaction_hash'])
+        print("user = ", user_)
+        return render(request, 'get_transactions.html', {
+            'user_': user_,
+            'mess': mess,
+            'list_info_transaction':list_info_transaction})
+    else:
+        return render(request,'get_transactions.html', {
+            'user_': user_,
+            'mess': "User does not have a wallet account yet"
+
+        })
+
+
+def list_transaction_of_current_user(request):
     result , list_user_id_in_wallets = check_wallet_account_exist(request.user.id)
     print( result , ' dsdsds , ', list_user_id_in_wallets[0])
     if result:
@@ -278,12 +298,12 @@ def list_transaction_by_account(request):
             print(" thong tin = ", i['transaction_hash'])
 
         return render(request, 'get_transactions.html', {
-            'user': request.user,
+            'user_': request.user,
             'mess': mess,
             'list_info_transaction':list_info_transaction})
     else:
         return render(request,'get_transactions.html', {
-            'user': request.user,
+            'user_': request.user,
             'mess': "User does not have a wallet account yet"
 
         })
@@ -326,11 +346,9 @@ def check_signature(request, transaction_hash):
             
     # chuyen signature tu bytes >> string
     signature_string = info_1_transaction['data']['signature']
-   
-    # print(type(signature_json))
-
     sign1 = signature_string.encode() # bytes
     signatue_ = base64.b64decode(sign1)
+    
     verifier = PKCS1_v1_5.new(pub_import)
     result = verifier.verify(h, signatue_)
     print("ket qua: ", result)
@@ -354,5 +372,6 @@ def sign_transaction(request):
     print("ket qua: ", signed)
     print(signed['rawTransaction'].hex())
     print(type(signed['rawTransaction'].hex()))
+
     return render(request, 'base.html', {'signed': signed['rawTransaction'].hex()
         })

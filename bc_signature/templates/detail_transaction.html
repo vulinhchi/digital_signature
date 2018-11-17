@@ -1,25 +1,78 @@
 {% extends 'base.html' %}
 
 {% block detail_transaction %}
-<h4>from: </h4>
-{{ info.from}}
-<br/>
-<h4>to : </h4>
-{{ info.to}}
-<br/>
-<h4>time: </h4>
-{{ info.time}}
-<br/>
-<h4>public key: </h4>
-{{ info.data.public_key}}
-<br/>
-<h4>signature: </h4>
-{{ info.data.signature}}
-<br/>
-<h4>contract: </h4>
-{{ info.data.text}}
-<br/>
 
-<a href="{% url 'bc_signature:check_signature' info.transaction_hash %}">check signature</a>
-{{verify}}
-{% endblock %}
+<style>
+#customers {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 80%;
+    padding-bottom: 10px
+}
+
+#customers td, #customers th {
+    border: 1px solid rgb(138, 185, 26);
+    padding: 8px;
+}
+
+/* #customers tr:nth-child(even){background-color: #f2f2f2;} */
+#customers tr {background-color: rgb(231, 216, 216);}
+#customers tr:hover {background-color: rgb(212, 117, 117);}
+
+#customers th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50;
+    color: white;
+}
+a {
+    color:hotpink
+}
+h4 {
+    color:greenyellow
+}
+</style>
+
+<table id="customers">
+       <h4> detail transaction: {{info.transaction_hash}}</h4>
+    <tr>
+        <th>From</th>
+        <td>{{ info.from}}</td>
+    </tr>
+
+    <tr>
+        <th>To</th>
+        <td>>{{ info.to}}</td>
+    </tr>
+
+    <tr>
+        <th>Time</th>
+        <td>{{ info.time}}</td>
+    </tr>
+
+    <tr>
+        <th>Public key</th>
+        <td>{{ info.data.public_key}}</td>
+    </tr>
+
+    <tr>
+        <th>Signature</th>
+        <td>{{ info.data.signature}}</td>
+    </tr>
+
+    <tr>
+        <th>Contract</th>
+        <td>{{ info.data.text}}</td>
+    </tr>
+
+    <tr>
+        <th>Check</th>
+        <td><a href="{% url 'bc_signature:check_signature' info.transaction_hash %}">check signature</a>
+            {{verify}}
+
+        <td>
+    </tr>
+</table>
+
+  {% endblock %}
