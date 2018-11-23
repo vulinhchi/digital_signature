@@ -96,9 +96,13 @@ def ResgisterRSA(request):
                     i = models.RSAAccount.objects.get(user=u)
                     pub = i.rsa_public_key
                     pri = i.rsa_private_key
-                    
-                    # info = f"publickey : {pub} and private_key: {pri}"
-            # data += info
+                    print(type(pub))
+                    print(pub)
+                    print(pri)
+                    print(len(pub)) # 271
+                    print(len(pri))  #882
+                    info = f"publickey : {pub} and private_key: {pri}"
+            data += info
     else:
         data = "User need to log in!"           
     return render(request, 'get_account.html', {'data':data})
