@@ -50,11 +50,20 @@ def RegisterWallet(request):
         result , list_user_id_in_wallets = check_wallet_account_exist(id_user)
         if not result:
             wallet = models.WalletAccount() 
-            
+
+            # list_node = get_all_nodes()
+            # url = list_node[random.randrange(0,len(list_node)-1)]
+            # print(" url register wallet ", url)
+            # rep = requests.get(f'http://{url}/account/{id_user}')
+            # data = rep.text
+            # data = json.loads
             for i in range(2200, 2210):
                 try:
                     rep = requests.post(f'http://172.30.0.1:{i}/account/{id_user}')
                     data = rep.text
+                    print(type(data))
+                    print(data)
+                    data = json.loads(data)
                     if data:
                         break
                     else:
@@ -145,6 +154,26 @@ def check_wallet_account_exist(user_id):
         return True, list_user_id_has_wallet_key
 
 
+def get_all_nodes():
+    list_node = []
+    for i in range(2200, 2210):
+        try:
+            print(" i = ", i)
+            # get list of nodes 
+            rep = requests.get(f'http://172.30.0.1:{i}/nodes')
+            list_node = json.loads(rep.text)
+            print("cac node: ",list_node)
+            if list_node:
+                print(" okie")
+                break
+            else:
+                pass
+        except:
+            pass
+            
+    return list_node['nodes']
+
+
 def sign_contract(request):
     try:
         content = request.POST['content']
@@ -207,26 +236,9 @@ def sign_contract(request):
                         
                         # save on blokchhain: 
                         if result:
-                            
-                            
-                            list_node = []
-                            for i in range(2200, 2210):
-                                try:
-                                    print(" i = ", i)
-                                    # get list of nodes 
-                                    rep = requests.get(f'http://172.30.0.1:{i}/nodes')
-                                    list_node = json.loads(rep.text)
-                                    print("cac node: ",list_node)
-                                    if list_node:
-                                        print(" okie")
-                                        break
-                                    else:
-                                        pass
-                                except:
-                                    pass
-                             
+                            list_node = get_all_nodes()
                             # random
-                            list_node = list_node['nodes']
+                            
                             url = list_node[random.randrange(0,len(list_node)-1)]
                             print("URL:", url)
                             print(" dung roi:")
@@ -245,7 +257,7 @@ def sign_contract(request):
                                 }
                             }
                             print("Transaction moi: ", transaction)
-                            rep = requests.post(f'http://172.30.0.1:{i}/transactions', headers=headers, data= json.dumps(transaction))
+                            rep = requests.post(f'http://{url}/transactions', headers=headers, data= json.dumps(transaction))
                             if rep.text:
                                 print("OKIE")
                             
@@ -283,32 +295,20 @@ def list_transaction_by_account(request, username):
         mess = ''
         wallet = models.WalletAccount.objects.get(user=user_)
         account = wallet.wallet_account
-        # account = '0x26ADdBcD2c9A2186C75b676c857ea10D1d4e5e2D'
         print(" ac = ", account)
-        for i in range(2200, 2210):
-            try:
-                rep = requests.get(f'http://172.30.0.1:{i}/transactions/{account}')
-                data = rep.text
-                if data:
-                    break
-                else:
-                    pass
-            except:
-                pass
-        print( "adddddd  ", data)
-        print(type(data))
+        list_node = get_all_nodes()
+        url = list_node[random.randrange(0,len(list_node)-1)]
+        print(" url get transaction: ", url)
+        rep = requests.get(f'http://{url}/transactions/{account}')
+        data = rep.text
         data = json.loads(data)
-        print("dât = ", data['result'])
-
-        print(type(data['result']))
         list_info_transaction = data['result']
-        print(type(list_info_transaction))
         username = user_.username
         if len(list_info_transaction) == 0:
             mess = f'User @{username} does not have any transaction yet'
         for i in list_info_transaction:
             print(" thong tin = ", i['transaction_hash'])
-        print("user = ", user_)
+        
         return render(request, 'get_transactions.html', {
             'user_': user_,
             'mess': mess,
@@ -328,22 +328,13 @@ def list_transaction_of_current_user(request):
         mess = ''
         wallet = models.WalletAccount.objects.get(user=request.user)
         account = wallet.wallet_account
-        # account = '0x26ADdBcD2c9A2186C75b676c857ea10D1d4e5e2D'
         print(" ac = ", account)
-        
-        for i in range(2200, 2210):
-            try:
-                print('i = ', i)
-                rep = requests.get(f'http://172.30.0.1:{i}/transactions/{account}')
-                data = rep.text
-                # print("dta  = ", data)
-                if data:
-                    break
-                else:
-                    pass
-            except:
-                pass
-            
+        list_node = get_all_nodes()
+        url = list_node[random.randrange(0,len(list_node)-1)]
+        print(" url get transactions: ", url)
+        rep = requests.get(f'http://{url}/transactions/{account}')
+
+        data = rep.text
         # print( "adddddd  ", data)
         
         data = json.loads(data)
@@ -369,18 +360,13 @@ def list_transaction_of_current_user(request):
 
 def detail_transaction(request, transaction_hash):
     info = ''
-    # wallet = models.WalletAccount.objects.get(user=request.user)
-    # account = wallet.wallet_account
-    for i in range(2200, 2210):
-        try:
-            rep = requests.get(f'http://172.30.0.1:{i}/transaction/{transaction_hash}')
-            data = rep.text
-            if data:
-                break
-            else:
-                pass
-        except:
-            pass
+    list_node = get_all_nodes()
+    url = list_node[random.randrange(0,len(list_node)-1)]
+    print(" url get detail transaction: ", url)
+    
+    rep = requests.get(f'http://{url}/transaction/{transaction_hash}')
+    data = rep.text
+    
     # print(type(data))
     data = json.loads(data)
     info_1_transaction = data['result']
@@ -397,17 +383,13 @@ def detail_transaction(request, transaction_hash):
 
 def check_signature(request, transaction_hash):
     mess = ''
-   
-    for i in range(2200, 2210):
-        try:
-            rep = requests.get(f'http://172.30.0.1:{i}/transaction/{transaction_hash}')
-            data = rep.text
-            if data:
-                break
-            else:
-                pass
-        except:
-            pass
+    list_node = get_all_nodes()
+    url = list_node[random.randrange(0,len(list_node)-1)]
+    print(" url get detail transaction: ", url)
+    
+    rep = requests.get(f'http://{url}/transaction/{transaction_hash}')
+    data = rep.text
+    
     data = json.loads(data)
     info_1_transaction = data['result']
     print("list_info_transaction = ", info_1_transaction)
@@ -433,6 +415,39 @@ def check_signature(request, transaction_hash):
 
 
 def sign_transaction(request):
+    # data = ''
+    # list_user_id_in_wallets = []
+    # if request.user.is_authenticated:
+    #     id_user = request.user.id
+    #     u = models.User.objects.get(id=id_user)
+    #     result , list_user_id_in_wallets = check_wallet_account_exist(id_user)
+    #     if not result:
+    #         wallet = models.WalletAccount() 
+            
+    #         list_node = get_all_nodes()
+    #         url = list_node[random.randrange(0,len(list_node)-1)]
+    #         print(" url register wallet ", url)
+    #         rep = requests.get(f'http://{url}/account/{id_user}')
+    #         data = rep.text
+
+    #         # save json in models:
+    #         wallet.user = u
+    #         wallet.wallet_private_key = data['private_key']
+    #         wallet.wallet_account  = data['address']
+    #         wallet.save()
+    #     else:
+    #         data = 'user already have an wallet account '
+    #         info = ""
+    #         for item in list_user_id_in_wallets:
+    #             if id_user == item:
+    #                 i = models.WalletAccount.objects.get(user=u)
+    #                 info = f"account : {i.wallet_account}"
+    #                 print(i.wallet_account)
+    #                 print(i.wallet_private_key)
+    #         data += info
+    # else:
+    #     data = "User need to log in!"  
+
     wallet = models.WalletAccount.objects.get(user = request.user)
     transaction = {
         'from': wallet.wallet_account,
