@@ -8,11 +8,15 @@ from django.urls import reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import views as base_auth_view
 import requests
-from bc_signature import models
+from bc_signature import models, my_rsa
 import json
+# ---- for RSA- 
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA
+
+from ast import literal_eval # convert string to tuple
+#-----
 from eth_account import Account
 import base64
 import json
@@ -99,17 +103,16 @@ def ResgisterRSA(request):
         result, list_user_id_has_rsa_key = check_RSA_account_exist(id_user)
         if  not result:
             rsa_key = models.RSAAccount()
-            prikey = RSA.generate(1024)
-            pubkey = prikey.publickey()
+            # prikey = RSA.generate(1024)
+            # pubkey = prikey.publickey()
             # save json in models:
+            pub_string, pri_string = my_rsa.pri_key()
             rsa_key.user = u
-            rsa_key.rsa_private_key = prikey.exportKey().decode() # save the key in DB by String
-            rsa_key.rsa_public_key  = pubkey.exportKey().decode()
-            print("ahhihi  = ", prikey.exportKey().decode())
-            print('sau khi luu vao DB',rsa_key.rsa_private_key)# <class 'bytes'>
+            rsa_key.rsa_private_key = pri_string #prikey.exportKey().decode() # save the key in DB by String
+            rsa_key.rsa_public_key  = pub_string  #pubkey.exportKey().decode()
             rsa_key.save()
-            print('sau khi luu vao DB 2 ',type(rsa_key.rsa_private_key)) # <class 'bytes'>
-            data = f'publickey = {pubkey} and private key = {prikey}'
+            print('sau khi luu vao DB 2 ',type(pri_string)) # <class 'bytes'>
+            data = f'publickey = {pub_string} and private key = {pri_string}'
         else:
             data = 'user already have an rsa keypair  '
             info = ""
@@ -192,28 +195,47 @@ def sign_contract(request):
                 for item in list_user_id_has_rsa_key:
                     if id_user == item:
                         i = models.RSAAccount.objects.get(user=u)
-                        print( "i  = ", i.rsa_public_key)
+                        print( " pub = ", i.rsa_public_key)
                         pub = i.rsa_public_key
                         pri = i.rsa_private_key
                         
-                        pub_import = RSA.importKey(pub)
-                        pri_import = RSA.importKey(pri)
+                        # convert key from string >> bytes (base64)
+                        pub_bytes = pub.encode()
+                        pri_bytes = pri.encode()
+                        # bytes(of base64) >> bytes (like tuple)
+                        pub_tuple = base64.b64decode(pub_bytes)
+                        pri_tuple = base64.b64decode(pri_bytes)
+
+                        pub_pair = literal_eval(pub_tuple.decode())
+                        pri_pair = literal_eval(pri_tuple.decode())
+
+                        n = pub_pair[1] # int
+                        e = pub_pair[0]
+                        d = pri_pair[0]
+
+                        #sign:
+                        signature = my_rsa.sign(content, d, n) #int
                         
-                        h = SHA.new(content.encode())
-                        print( " h = ", h)
-                        signer = PKCS1_v1_5.new(pri_import)
-                        signature = signer.sign(h)
-                        # sig = prikey.sign(message.encode(),10)
-                        print ( " signature: ")
-                        print(signature)
+                        #verify:
+                        result = my_rsa.verify(content, signature, e, n)
+                        # pub_import = RSA.importKey(pub)
+                        # pri_import = RSA.importKey(pri)
                         
-                        luu = base64.b64encode(signature)
-                        sign = luu.decode() # str >> save
-                        print ("sign = ")
-                        print(sign)
-                        # verify:
-                        verifier = PKCS1_v1_5.new(pub_import)
-                        result = verifier.verify(h, signature)
+                        # h = SHA.new(content.encode())
+                        # print( " h = ", h)
+                        # signer = PKCS1_v1_5.new(pri_import)
+                        # signature = signer.sign(h)
+                        # # sig = prikey.sign(message.encode(),10)
+                        # print ( " signature: ")
+                        # print(signature)
+                        
+                        # luu = base64.b64encode(signature)
+                        # sign = luu.decode() # str >> save
+                        # print ("sign = ")
+                        # print(sign)
+                        # # verify:
+                        # verifier = PKCS1_v1_5.new(pub_import)
+                        # result = verifier.verify(h, signature)
                         print("ket qua = ",result)
                        
                         
@@ -240,7 +262,7 @@ def sign_contract(request):
                             # random
                             
                             url = list_node[random.randrange(0,len(list_node)-1)]
-                            print("URL:", url)
+                            print("Node verify and save in transaction:", url)
                             print(" dung roi:")
                             wallet = models.WalletAccount.objects.get(user=u)
                             print(wallet.wallet_account)
@@ -250,7 +272,7 @@ def sign_contract(request):
                                 'data':
                                 {
                                     'text': content,
-                                    'signature': sign,
+                                    'signature': str(signature),
                                     'public_key': pub,
                                     'user_id': id_user,
                                     'username': u.username
@@ -335,10 +357,9 @@ def list_transaction_of_current_user(request):
         rep = requests.get(f'http://{url}/transactions/{account}')
 
         data = rep.text
-        # print( "adddddd  ", data)
         
         data = json.loads(data)
-        # print("dât = ", data['result'])
+        
         list_info_transaction = data['result']
         username = request.user.username
         if len(list_info_transaction) == 0:
@@ -370,10 +391,6 @@ def detail_transaction(request, transaction_hash):
     # print(type(data))
     data = json.loads(data)
     info_1_transaction = data['result']
-    # print("dât = ", data['result'])
-
-    # print(type(data['result']))
-    # list_info_transaction = data['result']
     
     print("list_info_transaction = ", info_1_transaction)
             
@@ -394,19 +411,25 @@ def check_signature(request, transaction_hash):
     info_1_transaction = data['result']
     print("list_info_transaction = ", info_1_transaction)
     content = info_1_transaction['data']['text']
+    signature = int(info_1_transaction['data']['signature'])
     # pub = 
-    pub_import = RSA.importKey(info_1_transaction['data']['public_key'].encode())
-    # verify:
-    print("verify: ")
-    h = SHA.new(content.encode())
-            
-    # chuyen signature tu bytes >> string
-    signature_string = info_1_transaction['data']['signature']
-    sign1 = signature_string.encode() # bytes
-    signatue_ = base64.b64decode(sign1)
+    pub = info_1_transaction['data']['public_key']
     
-    verifier = PKCS1_v1_5.new(pub_import)
-    result = verifier.verify(h, signatue_)
+    # convert key from string >> bytes (base64)
+    pub_bytes = pub.encode()
+    
+    # bytes(of base64) >> bytes (like tuple)
+    pub_tuple = base64.b64decode(pub_bytes)
+    
+    pub_pair = literal_eval(pub_tuple.decode())
+    
+
+    n = pub_pair[1] # int
+    e = pub_pair[0]
+    
+    #verify:
+    result = my_rsa.verify(content, signature, e, n)
+
     print("ket qua: ", result)
     return render(request, 'detail_transaction.html', {
         'verify':result,
