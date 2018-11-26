@@ -89,30 +89,34 @@ def pri_key():
 
     d = inv(e,phi)
     # m = pow(ascii_to_int(m),inv(e,phi),n)
-    # print ("d = ",d)  # int >> ascii
     return n, d , e
 
 
 # sign 
-def sign(mess, private_key):
-    n = 65537
+def sign(mess, private_key, n):
+    # print("private_key = ", private_key)
     signature = pow(ascii_to_int(mess), private_key , n)
     return signature
 
 
-def verify(mess, signature, public_key):
-    n = 65537
-    mess_ = pow(signature, public_key, n)
-    # return int_to_ascii(mess_) == mess
-    print("ASDKSD: ",mess_)
-    # print(int_to_ascii(mess_))
+def verify(mess, signature, public_key , n):
+    un_signature = pow(signature, public_key, n)
+    return int_to_ascii(un_signature) == mess
+    
     
 
 
 m = "ahihi"
 
 # # encode:
-n , d , e = pri_key()
+# n , d , e = pri_key()
+
+n = 29836544274755731529614329723299643005741263129971387634017504984087265739860673412590878160081621083774617572071140066025917501107515486138374688734587304780794295862131842387670982670129358346142736155771354265797094785772989279198007053165889986511435609732955958687949462109487856227318881388796889800110878579481935731811776782537356920464629798298196959484957966765043912179999164036797848690313670886484801698580710573804746118085551657547703163915686748194146006402391514242882145414883894616978253213424964801486525875790323683660844490168555309460407290570880973280203416983669097294318418367434327424406213
+d = 17292238906084302770791172709768380308635891137307219074765199685835278004747363447067142608822195303798027057081924914595761546066599946747545444591693693600392293509488590710757387960381516060569442412754067917020477764438644609789552495542975713835907331194391964521482283584916569923589011883221268371722818854712181021397863751313298457630365887419017441217790320086112754992424117112271880186886955486257510685388180834719893392072141713216588858910666552940386320255906053895153784419358365365380687233793141080364355988069643983391982324404266848674595130526589611224637687964505101693710946274240173619144053
+e = 65537 # public key
+
+pub_wallet = 0x26ADdBcD2c9A2186C75b676c857ea10D1d4e5e2D
+pri_wallet = 0xad14ce7e7a577086dc3905576522ceca385391ac33cfff6ec7b02423854d17c1
 
 # c = pow(ascii_to_int(m), e , n)
 # print("encode: ", c)
@@ -122,18 +126,19 @@ n , d , e = pri_key()
 # print(unhexlify(format(mess,"x")).decode())
 
 
-# sign:
-signature = pow(ascii_to_int(m), d , n)
-print(" signature = ", signature)
-
-# verify: compare with the clear text
-un_signature = pow(signature, e, n)
-print("ahihi : ", int_to_ascii(un_signature))
-
-
 mess = "hello"
-signature = sign(mess, d)
-print(signature)
-verify(mess,signature,e)
+# a = pow(ascii_to_int(mess), d , n)
+a = sign(mess, d, n)
+print("signature: ",a)
+print(verify(mess,a,e,n))
 
-print(int_to_ascii(16084))
+# 
+b = sign(mess, pri_wallet , n)
+print(b)
+print(int_to_ascii(b))
+un_signature = pow(b, pub_wallet, n)
+print(" ssd")
+print(un_signature)
+print(int_to_ascii(un_signature))
+
+

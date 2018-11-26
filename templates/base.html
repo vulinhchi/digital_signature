@@ -56,8 +56,8 @@
                                 
                             </div>
                             
-                            {% else %} -->
-                            <!-- <div class="login-area">
+                            {% else %}
+                            <div class="login-area">
                             
                                     <a href="{% url 'bc_signature:login' %}"><span>Login / Register</span> <i class="fa fa-lock" aria-hidden="true"></i></a>
                             </div>
@@ -161,7 +161,7 @@
                         
                         <div class="tab-pane fade show active" id="video-1" role="tabpanel" aria-labelledby="video1">
                            
-                            <div class="video-playground bg-img" style="background-image: url(img/bg-img/45.jpg);">
+                            <div class="video-playground bg-img">
                                 <!-- Play Button -->
                                 <!-- get_transactions.html start -->
                                 {% block transaction %}
@@ -202,7 +202,7 @@
                     <div class="col-12 col-sm-6 col-lg-3">
                         <div class="single-footer-widget mb-70 wow fadeInUp" data-wow-delay="100ms">
                             <div class="widget-title">
-                                <a href="index.html"><img src="img/core-img/logo2.png" alt=""></a>
+                                <a href="index.html"><img src="{% static '/img/core-img/logo2.png' %}" alt=""></a>
                             </div>
                             <div class="widget-content">
                                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris velit arcu, scelerisque dignissim massa quis, mattis facilisis erat. Aliquam erat volutpat. Sed efficitur diam ut interdum ultricies.</p>
