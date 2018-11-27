@@ -40,7 +40,7 @@
                         <!-- Logo Area -->
                         <div class="logo">
                                 
-                            <a href="{% url 'bc_signature:home' %}"><img src="{% static '/img/core-img/bc.png' %}" alt=""></a>
+                            <a href="{% url 'bc_signature:home' %}"><img src="{% static '/img/core-img/logo.png' %}" alt=""></a>
                            
                            
                         </div>
@@ -95,8 +95,16 @@
                                     {% if request.user and user.is_authenticated %}
                                     <li><a href="#">Accounts</a>
                                         <ul class="dropdown">
-                                            <li><a href="{% url 'bc_signature:get_wallet' %}">Wallet account</a></li>
-                                            <li><a href="{% url 'bc_signature:get_rsa_account' %}">RSA key pair</a></li>
+                                            {% if not check_wallet  %}
+                                            <li><a href="{% url 'bc_signature:get_wallet' %}">View wallet account</a></li>
+                                            {% else %}
+                                            <li><a href="{% url 'bc_signature:get_wallet' %}"> Create wallet account</a></li>
+                                            {% endif %}
+                                            {% if not check_RSA  %}
+                                            <li><a href="{% url 'bc_signature:get_rsa_account' %}">View RSA key pair</a></li>
+                                            {% else %}
+                                            <li><a href="{% url 'bc_signature:get_rsa_account' %}">Create RSA key</a></li>
+                                            {% endif %}
                                         </ul>
                                     </li>
                                     <li><a href="{% url 'bc_signature:sign' %}">Sign Contract</a>

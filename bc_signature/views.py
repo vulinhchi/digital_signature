@@ -145,6 +145,22 @@ def check_RSA_account_exist(user_id):
         return True, list_user_id_has_rsa_key
 
 
+def check_RSA_account_exist_template(user_id):
+    list_user_id_has_rsa_key = []
+    u = models.User.objects.get(id=user_id)
+    rsa_keys = models.RSAAccount.objects.all()
+    for key in rsa_keys:
+            list_user_id_has_rsa_key.append(key.user.id)
+    if u.id not in list_user_id_has_rsa_key:
+        return render(request,'base.html', {
+            'check_RSA':False  # user chua co key
+            })
+    else:
+        return render(request,'base.html', {
+                'check_RSA': True #user cho roi
+            })
+
+
 def check_wallet_account_exist(user_id):
     list_user_id_has_wallet_key = []
     u = models.User.objects.get(id=user_id)
@@ -152,10 +168,26 @@ def check_wallet_account_exist(user_id):
     for key in wallet_keys:
             list_user_id_has_wallet_key.append(key.user.id)
     if u.id not in list_user_id_has_wallet_key:
-        return False, list_user_id_has_wallet_key
+        return False, list_user_id_has_wallet_key 
     else:
         return True, list_user_id_has_wallet_key
 
+
+def check_wallet_account_exist_template(user_id):
+    list_user_id_has_wallet_key = []
+    u = models.User.objects.get(id=user_id)
+    wallet_keys = models.WalletAccount.objects.all()
+    for key in wallet_keys:
+            list_user_id_has_wallet_key.append(key.user.id)
+    if u.id not in list_user_id_has_wallet_key:
+        return render(request,'base.html', {
+            'check_wallet':False  # user chua co key
+            })
+    else:
+        return render(request,'base.html', {
+                'check_wallet': True #user cho roi
+            })
+        
 
 def get_all_nodes():
     list_node = []
@@ -195,29 +227,19 @@ def sign_contract(request):
                 for item in list_user_id_has_rsa_key:
                     if id_user == item:
                         i = models.RSAAccount.objects.get(user=u)
-                        print( " pub = ", i.rsa_public_key)
+                        
                         pub = i.rsa_public_key
                         pri = i.rsa_private_key
                         
-                        # convert key from string >> bytes (base64)
-                        pub_bytes = pub.encode()
-                        pri_bytes = pri.encode()
-                        # bytes(of base64) >> bytes (like tuple)
-                        pub_tuple = base64.b64decode(pub_bytes)
-                        pri_tuple = base64.b64decode(pri_bytes)
-
-                        pub_pair = literal_eval(pub_tuple.decode())
-                        pri_pair = literal_eval(pri_tuple.decode())
-
-                        n = pub_pair[1] # int
-                        e = pub_pair[0]
-                        d = pri_pair[0]
-
+                        #encrypt contract:
+                        pub_4 = 'KDY1NTM3LCAyMDIwMzAzNTY5ODc1NjMwOTgwODI1NDczNjUxNTY5OTUxMDczMzY0MTg1NDU5Mzk1NTk0Mzk0NDA4MDY1ODcwNTcxNDkwMzk2OTY5NjAwNzM0MzQyNzY3NDUyMTI5NjUxMzcwOTE5MDI0NDc3MjE1NTI1NzcxNTE5NDIxMDMzOTE2ODQ2NzI2ODE1NzgzNjE5MjAwMzU4NjIxODE3OTY3MjYwNjU0Nzk1MjcyOTMxNzkyMjg3MDM5NTIwMjE0NTQxNzY4Mzc5NDY4Mjk5NzU0NjU3NDQxMjI2OTAzNjQ5Mzk2MzU4OTQ5ODc0NDE3Mzk3ODExNTgxMTY0MDYxMjA0NDI5OTQxNDg2MzA4MzExNDY5OTM3ODI5Njk0NDkyOTM5ODQ2Nzc3MDY5NTYxNTE5MzY2NjkwMjEwMzI4OTkxNzkxNzI4Nzg0MjE0NDI4NDkxNzk4MjY1MjQ0MTQ2NDUyNjAzMTgzMTM1MjY4Mzg2NzE3MzA0MDE5ODcxOTUzNTE4NTIzOTc4NzM2MjU4MTUxOTE1ODY0MTQ2NzA0ODY5NTgwNTcwNjM5OTM0OTIxNjA1MTM0NDE2MzY0NDQzMDQ1NDg4NzcyMzg0MjQxMjU5NjA5ODkxNzc4NzgwMTc4NzIxNzIyMTI5MTI2NTQ0NzMyNTM5ODQ1NjU2Njg1NTkzMjc3MzIxNTQ4OTk4MDg1ODQwNDkzMjU4NTI4NjQ3NDY3MDM1NTk3MjgxMzE2OTMyMzE5ODUzMDk3Mzc2NjA3OTk4MjY0NTM1NjIzMTU3ODEyMDUzNTIyMjI1MzU0NDI2NjYxNTQyNjI2OSk='
+                        encrypt_content = my_rsa.encrypt(content, pub_4)
+                        
                         #sign:
-                        signature = my_rsa.sign(content, d, n) #int
+                        signature = my_rsa.sign(encrypt_content, pri) #int
                         
                         #verify:
-                        result = my_rsa.verify(content, signature, e, n)
+                        result = my_rsa.verify(encrypt_content, signature, pub)
                         # pub_import = RSA.importKey(pub)
                         # pri_import = RSA.importKey(pri)
                         
@@ -271,7 +293,7 @@ def sign_contract(request):
                                 'to':url,
                                 'data':
                                 {
-                                    'text': content,
+                                    'text': str(encrypt_content),
                                     'signature': str(signature),
                                     'public_key': pub,
                                     'user_id': id_user,
@@ -298,11 +320,9 @@ def sign_contract(request):
 
 def list_all_user(request):
     if request.user:
-        users = models.User.objects.exclude(id = request.user.id)
+        users = models.User.objects.exclude(id = request.user.id).exclude(is_superuser=True)
     else:
-        users = models.User.objects.get.all()
-    print("users: ", users[0])
-    
+        users = models.User.objects.exclude(is_superuser=True)
     return render(request,'all_user.html', {
         'users': users
         
@@ -410,26 +430,14 @@ def check_signature(request, transaction_hash):
     data = json.loads(data)
     info_1_transaction = data['result']
     print("list_info_transaction = ", info_1_transaction)
-    content = info_1_transaction['data']['text']
-    signature = int(info_1_transaction['data']['signature'])
-    # pub = 
+
     pub = info_1_transaction['data']['public_key']
-    
-    # convert key from string >> bytes (base64)
-    pub_bytes = pub.encode()
-    
-    # bytes(of base64) >> bytes (like tuple)
-    pub_tuple = base64.b64decode(pub_bytes)
-    
-    pub_pair = literal_eval(pub_tuple.decode())
-    
-
-    n = pub_pair[1] # int
-    e = pub_pair[0]
-    
+    encrypt_content = info_1_transaction['data']['text']
+    signature = int(info_1_transaction['data']['signature'])
+  
     #verify:
-    result = my_rsa.verify(content, signature, e, n)
-
+    result = my_rsa.verify(encrypt_content, signature, pub)
+    
     print("ket qua: ", result)
     return render(request, 'detail_transaction.html', {
         'verify':result,
