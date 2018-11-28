@@ -107,14 +107,16 @@
                                             {% endif %}
                                         </ul>
                                     </li>
-                                    <li><a href="{% url 'bc_signature:sign' %}">Sign Contract</a>
-                                    </li>
-                                    <li><a href="{% url 'bc_signature:my_transactions' %}">My transactions</a>
-                                        
-                                    </li>
-                                    <li><a href="{% url 'bc_signature:sign_transaction' %}">Sign transaction</a>
-                                    </li>
+
+                                    <li><a href="{% url 'bc_signature:sign' %}">Sign Contract</a></li>
                                     
+                                    <li><a href="#">My Transactions</a>
+                                        <ul class="dropdown">
+                                            <li><a href="{% url 'bc_signature:my_transactions' %}">My transactions</a></li>
+                                            <li><a href="{% url 'bc_signature:my_transactions_b_side' %}">Transactions(B_side)</a></li>
+                                        </ul>
+                                    </li>  
+                                    <li><a href="{% url 'bc_signature:sign_transaction' %}">Sign transaction</a></li>
                                     {% endif %}
 
                                 </ul>

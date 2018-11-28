@@ -30,7 +30,7 @@ a {
     color:hotpink
 }
 h4 {
-    color:greenyellow
+    color:hotpink
 }
 </style>
 
@@ -73,6 +73,18 @@ h4 {
 
         <td>
     </tr>
+    {% if show_contract %}
+    <tr>
+            <th>Content of Contract</th>
+            <td>
+               
+                {{show_contract}}
+            <td>
+        </tr>
+    {% endif %}
+    
+        
+        
 </table>
 
   {% endblock %}

@@ -209,103 +209,124 @@ def get_all_nodes():
     return list_node['nodes']
 
 
+
 def sign_contract(request):
-    try:
+    list_user_RSA = []
+    list_user = models.User.objects.exclude(id = request.user.id)
+    for i in list_user:
+        do_have_RSA, _ = check_RSA_account_exist(i.id)
+        do_have_wallet, _ = check_wallet_account_exist(i.id)
+        if do_have_RSA and do_have_wallet:
+            print("CO")
+            list_user_RSA.append(i)
+        else:
+            print("CHUA CO")
+    # try:
+    if request.method == 'POST':
         content = request.POST['content']
-        print(content)
-        if len(content) == 0:
-            messages.error(request, 'You need to type something!')
-        # check have user has RSA account and wallet account?
+        print("NOi DUNG",content)
+        b_side = request.POST.get('B_side')
+        print(" DA CHON: ",b_side)
+        
+        # if do_have_RSA and do_have_wallet:
+        #     rsa_key = models.RSAAccount.objects.get(user = chosen_user)
+        #     print("KEY: ",rsa_key.rsa_public_key)
+
         if request.user.is_authenticated:
             id_user = request.user.id
-            u = models.User.objects.get(id=id_user)
-            print("user hien tai : ", u.username)
+            print("user hien tai : ", request.user.username)
             result_rsa, list_user_id_has_rsa_key = check_RSA_account_exist(id_user)
             result_wallet , list_user_id_in_wallets = check_wallet_account_exist(id_user)
+
+            chosen_user = models.User.objects.get(username = b_side)
+            # do_have_RSA, _ = check_RSA_account_exist(chosen_user.id)
+            # do_have_wallet, _ = check_wallet_account_exist(chosen_user.id)
+            
             if result_rsa and result_wallet:
                 # sign use private key
-                for item in list_user_id_has_rsa_key:
-                    if id_user == item:
-                        i = models.RSAAccount.objects.get(user=u)
-                        
-                        pub = i.rsa_public_key
-                        pri = i.rsa_private_key
-                        
-                        #encrypt contract:
-                        pub_4 = 'KDY1NTM3LCAyMDIwMzAzNTY5ODc1NjMwOTgwODI1NDczNjUxNTY5OTUxMDczMzY0MTg1NDU5Mzk1NTk0Mzk0NDA4MDY1ODcwNTcxNDkwMzk2OTY5NjAwNzM0MzQyNzY3NDUyMTI5NjUxMzcwOTE5MDI0NDc3MjE1NTI1NzcxNTE5NDIxMDMzOTE2ODQ2NzI2ODE1NzgzNjE5MjAwMzU4NjIxODE3OTY3MjYwNjU0Nzk1MjcyOTMxNzkyMjg3MDM5NTIwMjE0NTQxNzY4Mzc5NDY4Mjk5NzU0NjU3NDQxMjI2OTAzNjQ5Mzk2MzU4OTQ5ODc0NDE3Mzk3ODExNTgxMTY0MDYxMjA0NDI5OTQxNDg2MzA4MzExNDY5OTM3ODI5Njk0NDkyOTM5ODQ2Nzc3MDY5NTYxNTE5MzY2NjkwMjEwMzI4OTkxNzkxNzI4Nzg0MjE0NDI4NDkxNzk4MjY1MjQ0MTQ2NDUyNjAzMTgzMTM1MjY4Mzg2NzE3MzA0MDE5ODcxOTUzNTE4NTIzOTc4NzM2MjU4MTUxOTE1ODY0MTQ2NzA0ODY5NTgwNTcwNjM5OTM0OTIxNjA1MTM0NDE2MzY0NDQzMDQ1NDg4NzcyMzg0MjQxMjU5NjA5ODkxNzc4NzgwMTc4NzIxNzIyMTI5MTI2NTQ0NzMyNTM5ODQ1NjU2Njg1NTkzMjc3MzIxNTQ4OTk4MDg1ODQwNDkzMjU4NTI4NjQ3NDY3MDM1NTk3MjgxMzE2OTMyMzE5ODUzMDk3Mzc2NjA3OTk4MjY0NTM1NjIzMTU3ODEyMDUzNTIyMjI1MzU0NDI2NjYxNTQyNjI2OSk='
-                        encrypt_content = my_rsa.encrypt(content, pub_4)
-                        
-                        #sign:
-                        signature = my_rsa.sign(encrypt_content, pri) #int
-                        
-                        #verify:
-                        result = my_rsa.verify(encrypt_content, signature, pub)
-                        # pub_import = RSA.importKey(pub)
-                        # pri_import = RSA.importKey(pri)
-                        
-                        # h = SHA.new(content.encode())
-                        # print( " h = ", h)
-                        # signer = PKCS1_v1_5.new(pri_import)
-                        # signature = signer.sign(h)
-                        # # sig = prikey.sign(message.encode(),10)
-                        # print ( " signature: ")
-                        # print(signature)
-                        
-                        # luu = base64.b64encode(signature)
-                        # sign = luu.decode() # str >> save
-                        # print ("sign = ")
-                        # print(sign)
-                        # # verify:
-                        # verifier = PKCS1_v1_5.new(pub_import)
-                        # result = verifier.verify(h, signature)
-                        print("ket qua = ",result)
-                       
-                        
-                        # signature_json = json.dumps(signature).encode()
-                        # print("signature_json = ", signature_json)
-                        # print(signature_json)
-                        # print(type(signature_json))
-                        # verify:
-                        
-                        # chyen signature tu bytes thanh string
-                        # signature_json_ = signature_json.decode()
+                i = models.RSAAccount.objects.get(user=request.user)
+                j = models.RSAAccount.objects.get(user=chosen_user)
 
-                        # chuuyen signature tu string thanh list
-                        # sign = json.loads(signature_json)
+                k = models.WalletAccount.objects.get(user=chosen_user)
+                wallet = models.WalletAccount.objects.get(user=request.user)
+                    
+                pub = i.rsa_public_key
+                pri = i.rsa_private_key
+                
+                pub_b = j.rsa_public_key
+                account_b = k.wallet_account
+                #encrypt contract:
+                encrypt_content = my_rsa.encrypt(content, pub_b)
+                
+                #sign:
+                signature = my_rsa.sign(encrypt_content, pri) #int
+                
+                #verify:
+                result = my_rsa.verify(encrypt_content, signature, pub)
+                # pub_import = RSA.importKey(pub)
+                # pri_import = RSA.importKey(pri)
+                
+                # h = SHA.new(content.encode())
+                # print( " h = ", h)
+                # signer = PKCS1_v1_5.new(pri_import)
+                # signature = signer.sign(h)
+                # # sig = prikey.sign(message.encode(),10)
+                # print ( " signature: ")
+                # print(signature)
+                
+                # luu = base64.b64encode(signature)
+                # sign = luu.decode() # str >> save
+                # print ("sign = ")
+                # print(sign)
+                # # verify:
+                # verifier = PKCS1_v1_5.new(pub_import)
+                # result = verifier.verify(h, signature)
+                print("ket qua = ",result)
+                
+                
+                # signature_json = json.dumps(signature).encode()
+                # print("signature_json = ", signature_json)
+                # print(signature_json)
+                # print(type(signature_json))
+                # verify:
+                
+                # chyen signature tu bytes thanh string
+                # signature_json_ = signature_json.decode()
 
-                        # chuyen signature tu list thanh tuple:
-                        # sign1 = tuple(sign)
+                # chuuyen signature tu string thanh list
+                # sign = json.loads(signature_json)
 
-                        # result = pub_import.verify(content.encode(), sign1)
-                        
-                        # save on blokchhain: 
-                        if result:
-                            list_node = get_all_nodes()
-                            # random
-                            
-                            url = list_node[random.randrange(0,len(list_node)-1)]
-                            print("Node verify and save in transaction:", url)
-                            print(" dung roi:")
-                            wallet = models.WalletAccount.objects.get(user=u)
-                            print(wallet.wallet_account)
-                            transaction = {
-                                'from': wallet.wallet_account,
-                                'to':url,
-                                'data':
-                                {
-                                    'text': str(encrypt_content),
-                                    'signature': str(signature),
-                                    'public_key': pub,
-                                    'user_id': id_user,
-                                    'username': u.username
-                                }
-                            }
-                            print("Transaction moi: ", transaction)
-                            rep = requests.post(f'http://{url}/transactions', headers=headers, data= json.dumps(transaction))
-                            if rep.text:
-                                print("OKIE")
-                            
-                            messages.error(request, "Successful")
+                # chuyen signature tu list thanh tuple:
+                # sign1 = tuple(sign)
+
+                # result = pub_import.verify(content.encode(), sign1)
+                
+                # save on blokchhain: 
+                if result:
+                    list_node = get_all_nodes()
+                    # random
+                    url = list_node[random.randrange(0,len(list_node)-1)]
+                    print("Node verify and save in transaction:", url)
+                    print(" dung roi:")
+                    
+                    transaction = {
+                        'from': wallet.wallet_account,
+                        'to':account_b, #url,
+                        'data':
+                        {
+                            'text': str(encrypt_content),
+                            'signature': str(signature),
+                            'public_key': pub,
+                            'user_id': id_user,
+                            'username': request.user.username
+                        }
+                    }
+                    print("Transaction moi: ", transaction)
+                    rep = requests.post(f'http://{url}/transactions', headers=headers, data= json.dumps(transaction))
+                    if rep.text:
+                        print("OKIE")
+                    
+                    messages.error(request, "Successful")
             
             elif not result_rsa:
                 messages.error(request, "You should need a RSA account")
@@ -313,9 +334,48 @@ def sign_contract(request):
                 messages.error(request, "You should need a wallet account ")
         else:
             messages.error(request, 'You have to login!')
-        return render(request, 'sign_rsa.html')
-    except:
-        return render(request, 'sign_rsa.html')
+        return render(request, 'sign_rsa.html', {'list_user': list_user_RSA})
+    # except:
+    else:
+        print("AHIHI")
+        return render(request, 'sign_rsa.html', {'list_user': list_user_RSA})
+
+
+def list_transaction_for_b_side(request):
+    result , list_user_id_in_wallets = check_wallet_account_exist(request.user.id)
+    print( result , ' dsdsds , ', list_user_id_in_wallets[0])
+    if result:
+        mess = ''
+        wallet = models.WalletAccount.objects.get(user=request.user)
+        account = wallet.wallet_account
+        print(" ac = ", account)
+        list_node = get_all_nodes()
+        url = list_node[random.randrange(0,len(list_node)-1)]
+        print(" url get transactions in b_side: ", url)
+        rep = requests.get(f'http://{url}/transactions/{account}/b_side')
+
+        data = rep.text
+        
+        data = json.loads(data)
+        
+        list_info_transaction = data['result']
+        username = request.user.username
+        if len(list_info_transaction) == 0:
+            mess = f'User @{username} does not have any transaction yet'
+        for i in list_info_transaction:
+            print(" thong tin = ", i['transaction_hash'])
+
+        return render(request, 'get_transactions.html', {
+            'user_': request.user,
+            'mess': mess,
+            'list_info_transaction':list_info_transaction})
+    else:
+        return render(request,'get_transactions.html', {
+            'user_': request.user,
+            'mess': "User does not have a wallet account yet"
+
+        })
+# def b_side_check_contract(request):
 
 
 def list_all_user(request):
@@ -411,11 +471,24 @@ def detail_transaction(request, transaction_hash):
     # print(type(data))
     data = json.loads(data)
     info_1_transaction = data['result']
-    
+    pub = info_1_transaction['data']['public_key']
+    encrypt_content = info_1_transaction['data']['text']
+    signature = int(info_1_transaction['data']['signature'])
     print("list_info_transaction = ", info_1_transaction)
+
+    # decrypt:
+    wallet = models.WalletAccount.objects.get(user = request.user)
+    rsa = models.RSAAccount.objects.get(user=request.user)
+    show_contract = None
+    to = info_1_transaction['to']
+    if to == wallet.wallet_account:
+        show_contract = my_rsa.decrypt(int(encrypt_content), rsa.rsa_private_key)
             
     # return(request, 'detail_transaction.html') để lại nhắc nhở, code ngu, tốn mấy tiếng =.=
-    return render(request, 'detail_transaction.html', {'info':info_1_transaction})
+    return render(request, 'detail_transaction.html', {
+        'info':info_1_transaction,
+        'show_contract': show_contract
+    })
 
 
 def check_signature(request, transaction_hash):
@@ -436,12 +509,22 @@ def check_signature(request, transaction_hash):
     signature = int(info_1_transaction['data']['signature'])
   
     #verify:
-    result = my_rsa.verify(encrypt_content, signature, pub)
+    result = my_rsa.verify(int(encrypt_content), signature, pub)
     
     print("ket qua: ", result)
+
+     # decrypt:
+    wallet = models.WalletAccount.objects.get(user = request.user)
+    rsa = models.RSAAccount.objects.get(user=request.user)
+    show_contract = None
+    to = info_1_transaction['to']
+    if to == wallet.wallet_account:
+        show_contract = my_rsa.decrypt(int(encrypt_content), rsa.rsa_private_key)
+
     return render(request, 'detail_transaction.html', {
         'verify':result,
-        'info':info_1_transaction
+        'info':info_1_transaction,
+        'show_contract': show_contract
         })
 
 

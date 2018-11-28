@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block sign %}
+
 <form action="{% url 'bc_signature:sign' %}" method="POST"> 
     {% csrf_token %}
     {% if messages %}
@@ -9,7 +10,15 @@
     {% endfor %}
     </ul>
     {% endif %}
-  
+
+    <h4 style="color:indianred">choose some one!</h4>
+    <select required name='B_side'> 
+      <option value="">None</option>
+        {% for u in list_user %}
+        <option value={{u.username}}> {{u.username}} </option>
+      
+        {% endfor %}
+    </select>
   <h4 style="color:indianred">type your text for signing: </h4>
   <textarea name="content" rows="20" cols="90" required></textarea>
   <br>
