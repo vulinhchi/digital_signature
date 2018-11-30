@@ -145,22 +145,6 @@ def check_RSA_account_exist(user_id):
         return True, list_user_id_has_rsa_key
 
 
-def check_RSA_account_exist_template(user_id):
-    list_user_id_has_rsa_key = []
-    u = models.User.objects.get(id=user_id)
-    rsa_keys = models.RSAAccount.objects.all()
-    for key in rsa_keys:
-            list_user_id_has_rsa_key.append(key.user.id)
-    if u.id not in list_user_id_has_rsa_key:
-        return render(request,'base.html', {
-            'check_RSA':False  # user chua co key
-            })
-    else:
-        return render(request,'base.html', {
-                'check_RSA': True #user cho roi
-            })
-
-
 def check_wallet_account_exist(user_id):
     list_user_id_has_wallet_key = []
     u = models.User.objects.get(id=user_id)
@@ -171,22 +155,6 @@ def check_wallet_account_exist(user_id):
         return False, list_user_id_has_wallet_key 
     else:
         return True, list_user_id_has_wallet_key
-
-
-def check_wallet_account_exist_template(user_id):
-    list_user_id_has_wallet_key = []
-    u = models.User.objects.get(id=user_id)
-    wallet_keys = models.WalletAccount.objects.all()
-    for key in wallet_keys:
-            list_user_id_has_wallet_key.append(key.user.id)
-    if u.id not in list_user_id_has_wallet_key:
-        return render(request,'base.html', {
-            'check_wallet':False  # user chua co key
-            })
-    else:
-        return render(request,'base.html', {
-                'check_wallet': True #user cho roi
-            })
         
 
 def get_all_nodes():
@@ -312,6 +280,7 @@ def sign_contract(request):
                     transaction = {
                         'from': wallet.wallet_account,
                         'to':account_b, #url,
+                        'amount':0,
                         'data':
                         {
                             'text': str(encrypt_content),
@@ -383,9 +352,34 @@ def list_all_user(request):
         users = models.User.objects.exclude(id = request.user.id).exclude(is_superuser=True)
     else:
         users = models.User.objects.exclude(is_superuser=True)
+
+    list_user_id_has_wallet_key = []
+    wallet_keys = models.WalletAccount.objects.all()
+    for key in wallet_keys:
+            list_user_id_has_wallet_key.append(key.user.id)
+    if request.user.id not in list_user_id_has_wallet_key:
+        wallet = False
+    else:
+        wallet = True
+    list_user_id_has_rsa_key = []
+    rsa_keys = models.RSAAccount.objects.all()
+    for key in rsa_keys:
+        list_user_id_has_rsa_key.append(key.user.id)
+    
+    if request.user.id not in list_user_id_has_rsa_key:
+        rsa = False
+    else:
+        rsa = True
+
+    list_nodes = get_all_nodes()
+    print("LIS: ", list_nodes)
+    print(type(list_nodes))
+    
     return render(request,'all_user.html', {
-        'users': users
-        
+        'users': users,
+        'check_wallet': wallet,
+        'check_RSA': rsa,
+        'number_nodes': len(list_nodes)
     })
 
 

@@ -48,6 +48,7 @@
                         <!-- Search & Login Area -->
                         <div class="search-login-area d-flex align-items-center">
                             <!-- Top Search Area -->
+                            NUMBER OF NODES IN THE NETWORK: {{number_nodes}}
                            
                             <!-- Login Area -->
                             {% if request.user and user.is_authenticated %}
@@ -87,7 +88,6 @@
                             <div class="classycloseIcon">
                                 <div class="cross-wrap"><span class="top"></span><span class="bottom"></span></div>
                             </div>
-
                             <!-- Nav Start -->
                             <div class="classynav">
                                 <ul>
@@ -95,12 +95,14 @@
                                     {% if request.user and user.is_authenticated %}
                                     <li><a href="#">Accounts</a>
                                         <ul class="dropdown">
-                                            {% if not check_wallet  %}
+                                            
+                                            {% if check_wallet  %}
                                             <li><a href="{% url 'bc_signature:get_wallet' %}">View wallet account</a></li>
                                             {% else %}
-                                            <li><a href="{% url 'bc_signature:get_wallet' %}"> Create wallet account</a></li>
+                                            <li><a href="{% url 'bc_signature:get_wallet' %}"> Create wallet</a></li>
                                             {% endif %}
-                                            {% if not check_RSA  %}
+
+                                            {% if check_RSA  %}
                                             <li><a href="{% url 'bc_signature:get_rsa_account' %}">View RSA key pair</a></li>
                                             {% else %}
                                             <li><a href="{% url 'bc_signature:get_rsa_account' %}">Create RSA key</a></li>
@@ -113,7 +115,7 @@
                                     <li><a href="#">My Transactions</a>
                                         <ul class="dropdown">
                                             <li><a href="{% url 'bc_signature:my_transactions' %}">My transactions</a></li>
-                                            <li><a href="{% url 'bc_signature:my_transactions_b_side' %}">Transactions(B_side)</a></li>
+                                            <li><a href="{% url 'bc_signature:my_transactions_b_side' %}">Transactions (B_side)</a></li>
                                         </ul>
                                     </li>  
                                     <li><a href="{% url 'bc_signature:sign_transaction' %}">Sign transaction</a></li>
